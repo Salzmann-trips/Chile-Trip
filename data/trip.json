@@ -1,6 +1,6 @@
 {
  "settings": {
-  "title": "Holiday with Elo in Chile",
+  "title": "Our Trip through Chile",
   "start": "2026-11-05",
   "end": "2026-11-22",
   "factor": 1.35,
@@ -109,5 +109,5 @@
    "lng": -70.25
   }
  ],
- "syncedAt": "2026-10-23T14:59:24Z"
+ "syncedAt": "2026-10-23T15:14:55Z"
 }
