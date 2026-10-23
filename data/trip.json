@@ -81,7 +81,7 @@
   {
    "id": "x799gh98l9r4zhy9uudl",
    "type": "poi",
-   "title": "Arrival of Elo",
+   "title": "Arrival at Airport",
    "date": "2026-11-05",
    "time": "07:15",
    "endDate": "2026-11-05",
@@ -109,5 +109,5 @@
    "lng": -70.25
   }
  ],
- "syncedAt": "2026-10-23T15:14:55Z"
+ "syncedAt": "2026-10-23T15:20:23Z"
 }
