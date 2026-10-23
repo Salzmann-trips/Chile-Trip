@@ -75,8 +75,8 @@
    "type": "poi",
    "title": "La Boca",
    "place": "la boca, chile",
-   "lat": 0,
-   "lng": 0
+   "lat": -33.9231462,
+   "lng": -71.8474541
   },
   {
    "id": "8yba0mrp0vc83ifs8f5s",
@@ -280,5 +280,5 @@
    "lng": -70.25
   }
  ],
- "syncedAt": "2026-10-23T17:36:03Z"
+ "syncedAt": "2026-10-23T17:39:20Z"
 }
