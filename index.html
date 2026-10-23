@@ -127,6 +127,22 @@ main{padding-block:20px 60px}
 }
 .cover-cue:hover{opacity:1;text-decoration:underline}
 
+
+.info-links{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:.84rem}
+.info-links a{color:var(--hotel)}
+.info-block{display:flex;flex-direction:column;gap:4px}
+.info-block .lbl{font-size:.72rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.sg-more{margin:4px 0 6px;font-size:.84rem}
+.sg-more summary{cursor:pointer;color:var(--muted);font-size:.8rem}
+.sg-more ul{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.sg-more li{display:flex;flex-wrap:wrap;gap:2px 12px;align-items:baseline}
+.sg-more li b{font-weight:600;min-width:10ch}
+.sg-missing{background:var(--surface);border:1px dashed var(--copper);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.sg-missing h3{margin:0;font-size:.95rem}
+.sg-missing p{margin:0;color:var(--muted);font-size:.85rem}
+.sg-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.sg-status{font-size:.85rem;color:var(--muted)}
+.sg-status.bad{color:#b3261e}
 /* Suggested route */
 .sg{display:flex;flex-direction:column;gap:18px}
 .sg-intro h2{font-family:var(--f-display);font-size:1.5rem;margin:0 0 6px}
@@ -382,6 +398,7 @@ function openDetail(id){
     <h2>${esc(it.title)}</h2><div class="note">${esc(when)}${it.place?"<br>"+esc(it.place):""}</div>
     ${it.notes?`<p style="margin:0;white-space:pre-wrap">${esc(it.notes)}</p>`:""}
     ${it.url?`<a href="${esc(it.url)}" target="_blank" rel="noopener">Open link ↗</a>`:""}
+    <div class="info-block"><span class="lbl">Learn more</span><span class="info-links">${infoLinks(it)}</span></div>
     ${hasLoc(it)?`<div class="note" style="margin-top:6px">Navigate here from your current location</div>
       <div class="navgrid"><a class="btn waze" href="${nav.waze(it)}" target="_blank" rel="noopener">Waze</a><a class="btn" href="${nav.google(it)}" target="_blank" rel="noopener">Google Maps</a>
       <a class="btn" href="${nav.apple(it)}" target="_blank" rel="noopener">Apple Maps</a><a class="btn" href="${nav.osm(it)}" target="_blank" rel="noopener">OpenStreetMap</a></div>
@@ -433,6 +450,27 @@ function render(){
 
 let suggestion=null;
 
+// ---------- Links to learn more about a place ----------
+function infoQuery(it){
+  let q = (it.place && it.place.length < 60 ? it.place : it.title || "").replace(/\s*\(.*?\)\s*/g," ").trim();
+  if (!q) q = it.title || "";
+  return q;
+}
+function infoLinks(it){
+  const q = infoQuery(it); if (!q) return "";
+  const qc = /chile|santiago/i.test(q) ? q : q + ", Chile";
+  const e = encodeURIComponent;
+  const links = [
+    ["Wikipedia", `https://en.wikipedia.org/w/index.php?search=${e(qc)}&go=Go`],
+    ["Wikipedia ES", `https://es.wikipedia.org/w/index.php?search=${e(qc)}&go=Ir`],
+    ["Photos", `https://www.google.com/search?tbm=isch&q=${e(qc)}`],
+    ["Tripadvisor", `https://www.tripadvisor.com/Search?q=${e(qc)}`],
+    ["chile.travel", `https://www.google.com/search?q=${e(q + " site:chile.travel")}`],
+    ["Google Maps", hasLoc(it) ? `https://www.google.com/maps/search/?api=1&query=${(+it.lat).toFixed(5)},${(+it.lng).toFixed(5)}` : `https://www.google.com/maps/search/?api=1&query=${e(qc)}`]
+  ];
+  return links.map(([l,u])=>`<a href="${u}" target="_blank" rel="noopener">${l}</a>`).join("");
+}
+
 // ---------- Suggested route (data: trip/suggestion) ----------
 const SG_CATS = [
   {label:"Best value", hint:"rated 7+, cheapest first", q:"&nflt=review_score%3D70&order=price"},
@@ -466,9 +504,17 @@ function sgPlanHotel(st){
   const last = addDays(st.from, st.nights-1);
   return items.find(i=>i.type==="hotel" && i.date && i.date<=last && (i.endDate||addDays(i.date,1))>st.from);
 }
+function sgMissingHTML(sg){
+  const covered = new Set([...(sg.skipped||[]), ...sg.stages.flatMap(s=>s.days.flatMap(d=>d.stops||[]))]);
+  const missing = items.filter(i=>i.type!=="hotel" && !i.example && !covered.has(i.id));
+  const ctl = typeof sgUpdateControls==="function" ? sgUpdateControls() : "";
+  if (!missing.length) return ctl ? `<div class="sg-actions">${ctl}</div>` : "";
+  const chips = missing.map(it=>`<button class="sg-chip t-${it.type||"other"}" data-id="${esc(it.id)}" type="button">${esc(it.title||"Untitled")}<em>${it.date?esc(fmtShort(it.date)):"idea"}</em></button>`).join("");
+  return `<div class="sg-missing"><h3>Not in the suggestion yet (${missing.length})</h3><p>These entries were added after the route was suggested${ctl?". Update the suggestion to work them in.":"."}</p><div class="sg-chips">${chips}</div>${ctl}</div>`;
+}
 function renderSuggestion(sg){
   if (!sg || !Array.isArray(sg.stages) || !sg.stages.length)
-    return `<div class="empty"><h2>No suggestion yet</h2><p>Ask Claude for a suggested route, and it will appear here.</p></div>`;
+    return `<div class="empty"><h2>No suggestion yet</h2><p>A suggested route through all your places will appear here.</p>${typeof sgUpdateControls==="function"?sgUpdateControls():""}</div>`;
   let totKm=0, totH=0; const nights = sg.stages.reduce((n,s)=>n+s.nights,0);
   const stagesHTML = sg.stages.map((st,si)=>{
     const out = addDays(st.from, st.nights);
@@ -478,7 +524,8 @@ function renderSuggestion(sg){
       const chips = (d.stops||[]).map(id=>{ const it=items.find(i=>i.id===id); if(!it) return "";
         const sched = it.date ? (it.date===d.date ? "same day in your plan" : "in your plan: "+fmtShort(it.date)) : "idea";
         return `<button class="sg-chip t-${it.type||"other"}" data-id="${esc(it.id)}" type="button">${esc(it.title||"Untitled")}<em>${esc(sched)}</em></button>`; }).join("");
-      return `<li class="sg-day"><div class="sg-date">${esc(fmtDay(d.date))}</div><div class="sg-daybody"><p>${esc(d.text)}</p>${chips?`<div class="sg-chips">${chips}</div>`:""}
+      const more = (d.stops||[]).map(id=>items.find(i=>i.id===id)).filter(Boolean).map(it=>`<li><b>${esc(it.title||"")}</b><span class="info-links">${infoLinks(it)}</span></li>`).join("");
+      return `<li class="sg-day"><div class="sg-date">${esc(fmtDay(d.date))}</div><div class="sg-daybody"><p>${esc(d.text)}</p>${chips?`<div class="sg-chips">${chips}</div>`:""}${more?`<details class="sg-more"><summary>Learn more about these places</summary><ul>${more}</ul></details>`:""}
         ${r.km>2?`<div class="sg-drive">≈ ${Math.round(r.km)} km · ${sgFmtH(r.h)} driving${r.maps?` · <a href="${r.maps}" target="_blank" rel="noopener">Route in Google Maps ↗</a>`:""}</div>`:""}</div></li>`;
     }).join("");
     const hotels = `<div class="sg-hotels"><div class="sg-hotels-head"><b>Stay in ${esc(st.base)}</b><span>${esc(fmtShort(st.from))} → ${esc(fmtShort(out))} · ${st.nights} night${st.nights>1?"s":""} · 2 adults</span></div>
@@ -492,6 +539,7 @@ function renderSuggestion(sg){
     <div class="sg-intro"><h2>${esc(sg.title||"Suggested route")}</h2><p>${esc(sg.intro||"")}</p>
       <div class="sg-sum"><span><b>${sg.stages.length}</b> bases</span><span><b>${nights}</b> nights</span><span>≈ <b>${Math.round(totKm).toLocaleString("en-GB")}</b> km · <b>${Math.round(totH)}</b> h driving</span></div>
       <p class="sg-basis">${esc(sg.basis||"")}${sg.createdAt?` Suggested ${esc(fmtShort(sg.createdAt))}.`:""} Hotel buttons open Booking.com searches for those dates; prices and availability are live there.</p></div>
+    ${sgMissingHTML(sg)}
     ${notes?`<ul class="sg-notes">${notes}</ul>`:""}
     ${stagesHTML}
   </section>`;
