@@ -19,6 +19,14 @@
    "lng": -71.9
   },
   {
+   "id": "264d3xu5yubo53nzhaba",
+   "type": "poi",
+   "title": "TEST sync",
+   "place": "Santiago (Centro)",
+   "lat": -33.4372,
+   "lng": -70.6506
+  },
+  {
    "id": "2jqy0jwuvun3cuheyt2m",
    "type": "hotel",
    "title": "Hotel Director",
@@ -95,8 +103,9 @@
    "id": "y5abjq2i94e50ttsjw6m",
    "type": "poi",
    "title": "Vulcan Area",
-   "lat": 33.81603,
-   "lng": 70.00852
+   "place": "vulcan",
+   "lat": -33.6333,
+   "lng": -70.35
   },
   {
    "id": "zohmq6q35ent6pmr6npq",
@@ -107,5 +116,5 @@
    "lng": -70.25
   }
  ],
- "syncedAt": "2026-10-23T13:04:29Z"
+ "syncedAt": "2026-10-23T14:00:49Z"
 }
