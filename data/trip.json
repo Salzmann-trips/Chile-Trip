@@ -27,6 +27,13 @@
    "lng": -71.9
   },
   {
+   "id": "1d12kbwnhyib90wxetki",
+   "type": "poi",
+   "title": "Persa Bio Bio",
+   "lat": -33.4916476,
+   "lng": -70.7718901
+  },
+  {
    "id": "2agpt738f2mdyeszccq0",
    "type": "poi",
    "title": "Departure and some tears",
@@ -48,12 +55,20 @@
    "lng": -70.583
   },
   {
-   "id": "3j0qz77fv6dqts0j0lu6",
+   "id": "2o99egr3hnn07rtegjxw",
    "type": "poi",
-   "title": "Papudo",
-   "place": "papudo",
-   "lat": -32.5083,
-   "lng": -71.4469
+   "title": "Caguil",
+   "place": "Cahuil",
+   "lat": -34.2833,
+   "lng": -71.9833
+  },
+  {
+   "id": "2wj0e5b7etf90v45y5te",
+   "type": "poi",
+   "title": "Santiago old town",
+   "place": "Santiago (Centro)",
+   "lat": -33.4372,
+   "lng": -70.6506
   },
   {
    "id": "8yba0mrp0vc83ifs8f5s",
@@ -64,6 +79,14 @@
    "place": "El Ingenio",
    "lat": -33.76827,
    "lng": -70.27848
+  },
+  {
+   "id": "90aebkbi56u1x2ukusmj",
+   "type": "poi",
+   "title": "Creamfields Chile 14. 15. NOV",
+   "lat": -33.4576431,
+   "lng": -70.6683282,
+   "url": "https://www.stubhub.com/cl/creamfields-festival-tickets/grouping/712740?=&PCID=PSCLADWHOME7678619148C8F0&MetroRegionID=&psc=&ps=cc-CL&ps_p=0&ps_c=23949796776&ps_ag=200863205907&ps_tg=kwd-319180361181&ps_ad=813980415732&ps_adp=&ps_fi=&ps_li=&ps_lp=1003299&ps_n=g&ps_d=c&ps_ex=&pscpag=&gcid=C12289X486&utm_source=google&utm_medium=paid-search&utm_sub_medium=prospecting&utm_term=nb&utm_campaign=23949796776:default&utm_content=default&keyword=200863205907_kwd-319180361181_c&creative=813980415732&utm_kxconfid=s2rshsbmv&kwt=nb&mt=e&kw=creamfield%20en%20chile&gad_source=1&gad_campaignid=23949796776&gbraid=0AAAAAD3ylY3wI-UT4Ox32Q7C9XmA1HhQ0&gclid=CjwKCAjwi-zWBhAdEiwAqlRf-PFzjf4WeDZYFR5SlpM6qWKbidjvSVMd6n7WfuzIBQ9zEEciiUp6DRoClq4QAvD_BwE"
   },
   {
    "id": "99mu3to4xhgav34o0s6m",
@@ -84,17 +107,66 @@
    "lng": -70.577
   },
   {
+   "id": "ffifjmr7qt8dkxzlerm3",
+   "type": "poi",
+   "title": "Chanco",
+   "place": "Chanco",
+   "lat": -35.7333,
+   "lng": -72.5333
+  },
+  {
+   "id": "fmddhb380jctz46523sb",
+   "type": "poi",
+   "title": "Papudo/Zapalla",
+   "place": "Papudo",
+   "lat": -32.5081,
+   "lng": -71.4457
+  },
+  {
+   "id": "gr6d04ojmn1dnc9rwkzx",
+   "type": "poi",
+   "title": "Pellehue",
+   "place": "Pelluhue",
+   "lat": -35.8333,
+   "lng": -72.5333
+  },
+  {
+   "id": "io41b55l0jkbrg7s6aqp",
+   "type": "poi",
+   "title": "Olmue",
+   "place": "Olmue",
+   "lat": -32.9833,
+   "lng": -71.1833
+  },
+  {
+   "id": "jq6n18kxfu2qzmngeqvk",
+   "type": "poi",
+   "title": "Parral",
+   "place": "Parral",
+   "lat": -36.1447,
+   "lng": -71.827
+  },
+  {
    "id": "mp3sfh41tzw3v07kwjex",
    "type": "poi",
-   "title": "Portillo",
+   "title": "Portillo / Laguna del Inca",
    "place": "Portillo",
    "lat": -32.8355,
    "lng": -70.1287
   },
   {
+   "id": "mr3aksxpnr0giwaeffur",
+   "type": "poi",
+   "title": "Curanipe",
+   "place": "Curanipe",
+   "lat": -36.1333,
+   "lng": -72.7833
+  },
+  {
    "id": "mskw28ttsdr3w4ilgz3k",
    "type": "other",
    "title": "Pisco y Pebre",
+   "date": "2026-11-08",
    "place": "Camino al Volcán San José de Maipo Chile",
    "lat": -33.73037,
    "lng": -70.315704
@@ -138,6 +210,22 @@
    "lng": -70.3833
   },
   {
+   "id": "wls6170uttdkuhvkdcp6",
+   "type": "poi",
+   "title": "Papudo",
+   "place": "Papudo",
+   "lat": -32.5081,
+   "lng": -71.4456
+  },
+  {
+   "id": "wo6wfgruth7hz3lsoeyr",
+   "type": "poi",
+   "title": "Curicó/Maule: Wineries and of the beaten path",
+   "place": "Maule",
+   "lat": -35.5,
+   "lng": -71.5
+  },
+  {
    "id": "x799gh98l9r4zhy9uudl",
    "type": "poi",
    "title": "Arrival at Airport",
@@ -160,6 +248,14 @@
    "lng": -70.35
   },
   {
+   "id": "zewfe6dedinpzzm8o25z",
+   "type": "poi",
+   "title": "Parral: rural Chile",
+   "place": "Parral",
+   "lat": -36.1447,
+   "lng": -71.827
+  },
+  {
    "id": "zohmq6q35ent6pmr6npq",
    "type": "poi",
    "title": "Vale Nevado and hike",
@@ -168,5 +264,5 @@
    "lng": -70.25
   }
  ],
- "syncedAt": "2026-10-23T15:41:44Z"
+ "syncedAt": "2026-10-23T17:19:19Z"
 }
