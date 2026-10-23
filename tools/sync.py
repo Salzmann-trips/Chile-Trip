@@ -7,6 +7,7 @@ Usage:  python3 tools/sync.py <export_dir> [--include-notes] [--include-examples
   <export_dir>/items/<id>.json      one file per entry
   <export_dir>/trip/settings.json   trip name, dates, road factor, speed
   <export_dir>/trip/suggestion.json optional suggested route (shown on the Suggestion tab)
+  <export_dir>/trip/suggestion_routes.json optional road routes for it (from tools/routes.py)
 
 The public site gets only the fields it needs. Costs are never published; notes only
 with --include-notes (they may hold booking numbers). Example entries are skipped
@@ -59,10 +60,19 @@ def main():
         if isinstance(g, dict) and isinstance(g.get("stages"), list):
             suggestion = {k: g[k] for k in ("title", "createdAt", "basis", "intro", "notes", "stages", "skipped") if k in g}
 
+    # Optional road routes for the suggestion (tools/routes.py output, stored as trip/suggestion_routes).
+    routes = None
+    rfile = src / "trip" / "suggestion_routes.json"
+    if suggestion and rfile.exists():
+        r = body(rfile)[1]
+        if isinstance(r, dict) and isinstance(r.get("days"), dict):
+            routes = {"days": r["days"]}
+
     trip = {
         "settings": {k: settings.get(k) for k in ("title", "start", "end", "factor", "speed")},
         "items": items,
         "suggestion": suggestion,
+        "routes": routes,
         "syncedAt": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
     }
     dest = root / "data" / "trip.json"
