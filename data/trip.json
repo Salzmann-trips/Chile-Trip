@@ -58,7 +58,7 @@
    "id": "2o99egr3hnn07rtegjxw",
    "type": "poi",
    "title": "Caguil",
-   "date": "2026-11-15",
+   "date": "2026-11-13",
    "time": "07:30",
    "place": "Cahuil",
    "lat": -34.2833,
@@ -76,6 +76,7 @@
    "id": "54z6ahheoksz0jwlmssz",
    "type": "poi",
    "title": "La Boca",
+   "date": "2026-11-15",
    "place": "la boca, chile",
    "lat": -33.9231462,
    "lng": -71.8474541
@@ -85,7 +86,7 @@
    "type": "hotel",
    "title": "Villa El Ingenio",
    "date": "2026-11-07",
-   "endDate": "2026-11-10",
+   "endDate": "2026-11-09",
    "place": "El Ingenio",
    "lat": -33.76827,
    "lng": -70.27848
@@ -128,6 +129,7 @@
    "id": "fmddhb380jctz46523sb",
    "type": "poi",
    "title": "Papudo/Zapalla",
+   "date": "2026-11-16",
    "place": "Papudo",
    "lat": -32.5081,
    "lng": -71.4457
@@ -136,8 +138,8 @@
    "id": "fqdtnlo46ds5zxsnp185",
    "type": "poi",
    "title": "Navidad",
-   "date": "2026-11-15",
-   "time": "07:00",
+   "date": "2026-11-13",
+   "time": "08:30",
    "place": "Navidad",
    "lat": -34.1978,
    "lng": -71.8428
@@ -170,6 +172,7 @@
    "id": "mp3sfh41tzw3v07kwjex",
    "type": "poi",
    "title": "Portillo / Laguna del Inca",
+   "date": "2026-11-10",
    "place": "Portillo",
    "lat": -32.8355,
    "lng": -70.1287
@@ -195,6 +198,7 @@
    "id": "nwrpg5ybq2qghleq1xo4",
    "type": "poi",
    "title": "Valparaiso",
+   "date": "2026-11-15",
    "place": "Valparaíso",
    "lat": -33.0472,
    "lng": -71.6127
@@ -203,6 +207,7 @@
    "id": "o69eszwa3xt670m7lw5z",
    "type": "poi",
    "title": "Putaendo",
+   "date": "2026-11-09",
    "place": "Putaendo",
    "lat": -32.6167,
    "lng": -70.7333
@@ -211,10 +216,8 @@
    "id": "pylioz5qlbvqe1clg7q6",
    "type": "poi",
    "title": "Pichilemu / Punto de Lobos",
-   "date": "2026-11-15",
-   "time": "08:00",
-   "endDate": "2026-11-15",
-   "endTime": "18:00",
+   "date": "2026-11-12",
+   "time": "08:30",
    "place": "punto de Lobos",
    "lat": -34.4417,
    "lng": -72.0233
@@ -284,5 +287,5 @@
    "lng": -70.25
   }
  ],
- "syncedAt": "2026-10-23T17:46:33Z"
+ "syncedAt": "2026-10-23T17:52:28Z"
 }
