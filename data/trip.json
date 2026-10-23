@@ -1,0 +1,111 @@
+{
+ "settings": {
+  "title": "Holiday with Elo in Chile",
+  "start": "2026-11-05",
+  "end": "2026-11-22",
+  "factor": 1.35,
+  "speed": 65
+ },
+ "items": [
+  {
+   "id": "0cucd0k1l15kw9n1bnmi",
+   "type": "event",
+   "title": "CHile 5-Star Surf",
+   "date": "2026-11-14",
+   "time": "08:00",
+   "endTime": "20:00",
+   "place": "Matanzas, Navidad",
+   "lat": -34.1,
+   "lng": -71.9
+  },
+  {
+   "id": "2jqy0jwuvun3cuheyt2m",
+   "type": "hotel",
+   "title": "Hotel Director",
+   "date": "2026-11-05",
+   "endDate": "2026-11-07",
+   "place": "Hotel Director, Santiago, Vitacura",
+   "lat": -33.401,
+   "lng": -70.583
+  },
+  {
+   "id": "4oz5bdyunmuq6dso5fhh",
+   "type": "hotel",
+   "title": "Hotel Double tree",
+   "date": "2026-11-10",
+   "endDate": "2026-11-22"
+  },
+  {
+   "id": "8yba0mrp0vc83ifs8f5s",
+   "type": "hotel",
+   "title": "Villa El Ingenio",
+   "date": "2026-11-07",
+   "endDate": "2026-11-10",
+   "place": "El Ingenio",
+   "lat": -33.76827,
+   "lng": -70.27848
+  },
+  {
+   "id": "99mu3to4xhgav34o0s6m",
+   "type": "poi",
+   "title": "El Yeso",
+   "place": "Embalse El Yeso",
+   "lat": -33.676,
+   "lng": -70.088
+  },
+  {
+   "id": "mskw28ttsdr3w4ilgz3k",
+   "type": "other",
+   "title": "Pisco y Pebre",
+   "place": "Camino al Volcán San José de Maipo Chile",
+   "lat": -33.73037,
+   "lng": -70.315704
+  },
+  {
+   "id": "pylioz5qlbvqe1clg7q6",
+   "type": "poi",
+   "title": "punto de lobos",
+   "place": "punto de Lobos",
+   "lat": -34.4417,
+   "lng": -72.0233
+  },
+  {
+   "id": "sb2kzp4gfu08bzd33cit",
+   "type": "poi",
+   "title": "Sewell old minig town",
+   "date": "2026-11-07",
+   "endDate": "2026-11-07",
+   "place": "sewell",
+   "lat": -34.0833,
+   "lng": -70.3833
+  },
+  {
+   "id": "x799gh98l9r4zhy9uudl",
+   "type": "poi",
+   "title": "Arrival of Elo",
+   "date": "2026-11-05",
+   "time": "07:15",
+   "endDate": "2026-11-05",
+   "endTime": "22:20",
+   "place": "Santiago Airport (SCL)",
+   "lat": -33.393,
+   "lng": -70.7858
+  },
+  {
+   "id": "y5abjq2i94e50ttsjw6m",
+   "type": "poi",
+   "title": "Vulcan Area",
+   "lat": 33.81603,
+   "lng": 70.00852
+  },
+  {
+   "id": "zohmq6q35ent6pmr6npq",
+   "type": "poi",
+   "title": "Vale Nevado and hike",
+   "place": "Vale Nevado",
+   "lat": -33.35,
+   "lng": -70.25
+  }
+ ],
+ "syncedAt": "2026-10-23T13:04:29Z"
+}

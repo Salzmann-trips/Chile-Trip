@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Chile Road Trip</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+/* Same visual system as the Claude planner. Read-only: list / calendar / map, with road routing from OSRM and hand-off to navigation apps. */
+:root{
+  --bg:#f2f4f5; --surface:#ffffff; --sunken:#e7ebee; --line:#d3dade; --fg:#1b2329; --muted:#5d6a73;
+  --copper:#b4572d; --copper-soft:#f6e3d9; --hotel:#3c5a8a; --hotel-soft:#e1e8f4;
+  --poi:#1f7a6d; --poi-soft:#dcefeb; --other:#6b6f7a; --other-soft:#e8e9ec; --road:#8a96a0; --warn:#a36a00;
+  --d1:#b4572d; --d2:#3c5a8a; --d3:#1f7a6d; --d4:#8a4f9e; --d5:#a36a00; --d6:#2f7fb5; --tiles:none;
+  --f-display:"Bricolage Grotesque","Avenir Next",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace; --r:10px; color-scheme:light;
+}
+@media (prefers-color-scheme: dark){ :root{
+  --bg:#11161a; --surface:#1a2026; --sunken:#151a1f; --line:#2c353d; --fg:#e4e9ec; --muted:#93a0a9;
+  --copper:#e08a5e; --copper-soft:#3a2419; --hotel:#8eaee0; --hotel-soft:#1f2a3c; --poi:#5fc2b2; --poi-soft:#163330;
+  --other:#a5a9b3; --other-soft:#252a31; --road:#6c7882; --warn:#e0a640;
+  --d1:#e08a5e; --d2:#8eaee0; --d3:#5fc2b2; --d4:#c592d6; --d5:#e0a640; --d6:#6db8e8;
+  --tiles:brightness(.62) invert(1) contrast(1.05) hue-rotate(200deg) saturate(.35) brightness(.9); color-scheme:dark }}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.45;padding-bottom:env(safe-area-inset-bottom,0px)}
+button,select{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--hotel)}
+:focus-visible{outline:2px solid var(--copper);outline-offset:2px}
+.wrap{max-width:980px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{position:sticky;top:0;z-index:1000;background:var(--surface);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
+.top .wrap{padding-block:14px;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between}
+.trip-name{font-family:var(--f-display);font-weight:700;font-size:1.5rem;margin:0;text-wrap:balance}
+.trip-meta{color:var(--muted);font-size:.85rem;display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:2px}
+.trip-meta b{color:var(--fg);font-family:var(--f-mono);font-weight:500}
+.seg{display:inline-flex;background:var(--sunken);border-radius:8px;padding:3px}
+.seg button{border:0;background:none;padding:6px 12px;border-radius:6px;font-size:.88rem;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);padding:6px 11px;border-radius:8px;font-size:.84rem;text-decoration:none;color:var(--fg)}
+.btn:hover{border-color:var(--muted)}
+.btn.waze{border-color:#33ccff}
+main{padding-block:20px 60px}
+.note{color:var(--muted);font-size:.82rem}
+.day{margin-bottom:24px}
+.day-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-bottom:8px;border-bottom:1px solid var(--line);margin-bottom:10px}
+.day-head h2{font-family:var(--f-display);font-size:1.15rem;font-weight:700;margin:0}
+.day-no{font-family:var(--f-mono);font-size:.75rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.day-drive{font-family:var(--f-mono);font-size:.8rem;color:var(--muted)}
+.day-tools{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+.stops{display:flex;flex-direction:column}
+.stop{display:grid;grid-template-columns:56px 1fr auto;gap:12px;align-items:start;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--c);border-radius:var(--r);padding:10px 12px;cursor:pointer;text-align:left;width:100%}
+.stop:hover{border-color:var(--c)}
+.stop.anchor{background:var(--sunken);border-style:dashed;border-left-style:solid}
+.stop-time{font-family:var(--f-mono);font-size:.82rem;color:var(--muted);padding-top:2px}
+.stop-body{min-width:0}
+.stop-title{font-weight:600;overflow-wrap:anywhere;display:block}
+.stop-sub{color:var(--muted);font-size:.84rem;overflow-wrap:anywhere;display:block}
+.tag{font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:99px;background:var(--cs);color:var(--c);white-space:nowrap}
+.t-event{--c:var(--copper);--cs:var(--copper-soft)} .t-hotel{--c:var(--hotel);--cs:var(--hotel-soft)}
+.t-poi{--c:var(--poi);--cs:var(--poi-soft)} .t-other{--c:var(--other);--cs:var(--other-soft)}
+.leg{display:grid;grid-template-columns:56px 1fr;gap:12px;align-items:center;min-height:44px}
+.leg-line{justify-self:center;width:0;height:100%;min-height:44px;border-left:2px dashed var(--road)}
+.leg-info{font-family:var(--f-mono);font-size:.8rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;padding-block:6px}
+.leg-info strong{color:var(--fg);font-weight:500}
+.leg-info .btn{font-family:var(--f-body);padding:3px 8px;font-size:.78rem}
+.est{color:var(--warn)}
+.ideas h2{font-family:var(--f-display);font-size:1.15rem;margin:30px 0 8px}
+.ideas .stops{gap:8px}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.cal-dow{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:2px 4px}
+.cell{background:var(--surface);border:1px solid var(--line);border-radius:8px;min-height:104px;padding:6px;display:flex;flex-direction:column;gap:3px;min-width:0;cursor:pointer;text-align:left}
+.cell.out{background:transparent;border-style:dashed;opacity:.55;cursor:default}
+.cell-num{font-family:var(--f-mono);font-size:.78rem;display:flex;justify-content:space-between}
+.cell-num span:last-child{color:var(--muted)}
+.chip{font-size:.74rem;padding:1px 5px;border-radius:4px;background:var(--cs);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:3px solid var(--c)}
+.mapbar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin-bottom:10px}
+.mapbar select{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 10px;max-width:100%}
+#map{position:relative;z-index:0;height:min(74vh,760px);min-height:380px;border-radius:var(--r);border:1px solid var(--line)}
+.leaflet-tile-pane{filter:var(--tiles)}
+.leaflet-container{font-family:var(--f-body);background:var(--sunken)}
+.route{fill:none;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:.9}
+.route.est{stroke-dasharray:2 8;stroke-width:3}
+.route.d1{stroke:var(--d1)} .route.d2{stroke:var(--d2)} .route.d3{stroke:var(--d3)} .route.d4{stroke:var(--d4)} .route.d5{stroke:var(--d5)} .route.d6{stroke:var(--d6)}
+.pin{background:none;border:0}
+.pin b{display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--c);color:#fff;font:600 11px/1 var(--f-mono);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)}
+.pin.t-hotel b{border-radius:6px}
+.pin.idea b{background:#fff;color:var(--c);border:2px dashed var(--c)}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--surface);color:var(--fg)}
+.leaflet-popup-content b{display:block}
+.leaflet-popup-content .btn{margin-top:6px}
+.scrim{position:fixed;inset:0;background:rgba(10,14,18,.45);z-index:2000;display:flex;justify-content:flex-end}
+.drawer{background:var(--surface);width:min(440px,100%);height:100%;overflow-y:auto;padding:calc(20px + env(safe-area-inset-top,0px)) max(18px,env(safe-area-inset-right,0px)) calc(24px + env(safe-area-inset-bottom,0px)) 18px;display:flex;flex-direction:column;gap:12px}
+.drawer h2{font-family:var(--f-display);margin:0;font-size:1.35rem}
+.navgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.navgrid .btn{justify-content:center;padding:10px}
+.coords{font-family:var(--f-mono);font-size:.82rem;color:var(--muted);user-select:all}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:9px 16px;border-radius:8px;font-size:.88rem;z-index:3000}
+@media (max-width:640px){
+  .stop{grid-template-columns:46px 1fr} .stop .tag{display:none} .leg{grid-template-columns:46px 1fr}
+  .cell{min-height:70px;padding:4px} .chip{font-size:0;height:6px;padding:0;border-left-width:0;background:var(--c)}
+  .day-tools{margin-left:0;width:100%}
+}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div><h1 class="trip-name" id="tripName">Chile trip</h1><div class="trip-meta" id="tripMeta">Loading…</div></div>
+  <div class="seg" role="group" aria-label="View">
+    <button id="vList" aria-pressed="true">List</button><button id="vCal" aria-pressed="false">Calendar</button><button id="vMap" aria-pressed="false">Map</button>
+  </div>
+</div></header>
+<main class="wrap">
+  <div id="view"></div>
+  <section id="mapView" hidden>
+    <div class="mapbar"><select id="mapDay" aria-label="Show day"></select><span class="note" id="mapSum"></span></div>
+    <div id="map"></div>
+  </section>
+  <p class="note" id="foot" style="margin-top:28px"></p>
+</main>
+<div id="overlay"></div>
+<div id="toast" class="toast" hidden></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+const TYPES={event:"Event",hotel:"Hotel",poi:"Place",other:"Other"};
+const OSRM="https://router.project-osrm.org/route/v1/driving/";
+let items=[], settings={title:"Chile trip",start:"",end:"",factor:1.3,speed:65}, syncedAt="";
+let view=(()=>{try{return localStorage.getItem("cts_view")||"list"}catch(e){return "list"}})();
+
+// ---------- helpers ----------
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const toD=s=>{const[y,m,d]=s.split("-").map(Number);return new Date(Date.UTC(y,m-1,d))};
+const fromD=d=>d.toISOString().slice(0,10);
+const addDays=(s,n)=>{const d=toD(s);d.setUTCDate(d.getUTCDate()+n);return fromD(d)};
+const fmtDay=s=>toD(s).toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short",timeZone:"UTC"});
+const fmtShort=s=>toD(s).toLocaleDateString("en-GB",{day:"numeric",month:"short",timeZone:"UTC"});
+const hasLoc=it=>it&&it.lat!=null&&it.lng!=null&&it.lat!==""&&Number.isFinite(+it.lat)&&Number.isFinite(+it.lng);
+const ll=it=>`${(+it.lat).toFixed(6)},${(+it.lng).toFixed(6)}`;
+function haversine(a,b){const R=6371,r=x=>x*Math.PI/180,dLat=r(b.lat-a.lat),dLng=r(b.lng-a.lng);const h=Math.sin(dLat/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dLng/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
+function estimate(a,b){const km=haversine({lat:+a.lat,lng:+a.lng},{lat:+b.lat,lng:+b.lng})*(+settings.factor||1.3);return{km,h:km/(+settings.speed||65),est:true}}
+const fmtKm=km=>km<10?km.toFixed(1)+" km":Math.round(km).toLocaleString("en-GB")+" km";
+function fmtH(h){const m=Math.round(h*60);if(m<60)return m+" min";const hh=Math.floor(m/60),mm=m%60;return hh+" h"+(mm?" "+String(mm).padStart(2,"0")+" min":"")}
+function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>t.hidden=true,2400)}
+
+// ---------- navigation hand-off ----------
+const nav={
+  google:(b,a)=>`https://www.google.com/maps/dir/?api=1${a?`&origin=${ll(a)}`:""}&destination=${ll(b)}&travelmode=driving`,
+  waze:b=>`https://waze.com/ul?ll=${ll(b)}&navigate=yes`,
+  apple:(b,a)=>`https://maps.apple.com/?${a?`saddr=${ll(a)}&`:""}daddr=${ll(b)}&dirflg=d`,
+  osm:(b,a)=>a?`https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=${ll(a)};${ll(b)}`:`https://www.openstreetmap.org/?mlat=${+b.lat}&mlon=${+b.lng}#map=15/${+b.lat}/${+b.lng}`,
+  googleDay:pts=>{const o=pts[0],d=pts[pts.length-1],w=pts.slice(1,-1).slice(0,9);return `https://www.google.com/maps/dir/?api=1&origin=${ll(o)}&destination=${ll(d)}${w.length?"&waypoints="+w.map(ll).join("%7C"):""}&travelmode=driving`}
+};
+function gpx(day,nodes,geom){
+  const pts=nodes.filter(n=>hasLoc(n.item)).map(n=>n.item);
+  const wpt=pts.map(p=>`<wpt lat="${+p.lat}" lon="${+p.lng}"><name>${esc(p.title)}</name></wpt>`).join("\n");
+  const trk=geom?`<trk><name>${esc(fmtDay(day))}</name><trkseg>${geom.map(([lng,lat])=>`<trkpt lat="${lat}" lon="${lng}"/>`).join("")}</trkseg></trk>`:"";
+  const rte=`<rte><name>${esc(fmtDay(day))}</name>${pts.map(p=>`<rtept lat="${+p.lat}" lon="${+p.lng}"><name>${esc(p.title)}</name></rtept>`).join("")}</rte>`;
+  const xml=`<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="Chile Road Trip" xmlns="http://www.topografix.com/GPX/1/1">\n${wpt}\n${rte}\n${trk}\n</gpx>`;
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([xml],{type:"application/gpx+xml"}));a.download=`route-${day}.gpx`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+}
+
+// ---------- itinerary model (same rules as the Claude planner) ----------
+function tripDays(){
+  let s=settings.start,e=settings.end;
+  for(const i of items.filter(i=>i.date)){if(!s||i.date<s)s=i.date;const last=i.endDate||i.date;if(!e||last>e)e=last}
+  if(!s)return[];if(!e||e<s)e=s;const out=[];for(let d=s;d<=e&&out.length<120;d=addDays(d,1))out.push(d);return out;
+}
+const hotelForNight=d=>items.find(i=>i.type==="hotel"&&i.date&&i.date<=d&&d<(i.endDate||addDays(i.date,1)));
+function dayNodes(d){
+  const nodes=[],morning=hotelForNight(addDays(d,-1)),night=hotelForNight(d);
+  if(morning)nodes.push({item:morning,role:"start"});
+  const list=items.filter(i=>i.type!=="hotel"&&i.date===d).sort((a,b)=>(a.time||"99").localeCompare(b.time||"99")||(a.title||"").localeCompare(b.title||""));
+  list.forEach(i=>nodes.push({item:i,role:"stop"}));
+  if(night&&!(morning&&morning.id===night.id&&list.length===0))nodes.push({item:night,role:"night"});
+  else if(night&&morning&&morning.id===night.id)nodes[0].role="stay";
+  return nodes;
+}
+
+// ---------- road routing (OSRM, cached) ----------
+const routeCache=new Map();
+try{const c=JSON.parse(localStorage.getItem("cts_routes")||"{}");for(const k in c)routeCache.set(k,c[k])}catch(e){}
+const pending=new Set();let queue=Promise.resolve();
+function saveCache(){try{const o={};[...routeCache].slice(-200).forEach(([k,v])=>o[k]=v);localStorage.setItem("cts_routes",JSON.stringify(o))}catch(e){}}
+function dayRoute(nodes){
+  const pts=nodes.filter(n=>hasLoc(n.item)).map(n=>n.item);
+  const uniq=pts.filter((p,i)=>i===0||p.id!==pts[i-1].id);
+  if(uniq.length<2)return null;
+  const key=uniq.map(p=>`${(+p.lng).toFixed(5)},${(+p.lat).toFixed(5)}`).join(";");
+  if(routeCache.has(key))return routeCache.get(key);
+  if(!pending.has(key)){pending.add(key);
+    queue=queue.then(()=>fetch(`${OSRM}${key}?overview=full&geometries=geojson&steps=false`).then(r=>r.ok?r.json():Promise.reject(r.status))
+      .then(j=>{if(j.code!=="Ok")throw j.code;const r=j.routes[0];routeCache.set(key,{legs:r.legs.map(l=>({km:l.distance/1000,h:l.duration/3600})),geom:r.geometry.coordinates.map(([a,b])=>[+a.toFixed(5),+b.toFixed(5)])});saveCache();scheduleRender()})
+      .catch(()=>{routeCache.set(key,{failed:true})})
+      .then(()=>new Promise(r=>setTimeout(r,400))));
+  }
+  return null;
+}
+function dayLegs(nodes){
+  const route=dayRoute(nodes);let ri=0,km=0,h=0,est=false;const legs=[];
+  for(let k=1;k<nodes.length;k++){
+    const a=nodes[k-1].item,b=nodes[k].item;
+    if(a.id===b.id){legs.push({same:true});continue}
+    if(!hasLoc(a)||!hasLoc(b)){legs.push({missing:true});continue}
+    let l=route&&route.legs?route.legs[ri]:null;ri++;
+    if(!l)l=estimate(a,b);
+    if(l.km<0.3){legs.push({same:true});continue}
+    km+=l.km;h+=l.h;est=est||!!l.est;legs.push({...l,a,b});
+  }
+  return{legs,km,h,est,route};
+}
+let rq=0;function scheduleRender(){cancelAnimationFrame(rq);rq=requestAnimationFrame(render)}
+
+// ---------- rendering ----------
+function renderHeader(){
+  $("#tripName").textContent=settings.title||"Chile trip";document.title=settings.title||"Chile Road Trip";
+  const days=tripDays();let km=0,h=0,est=false;days.forEach(d=>{const r=dayLegs(dayNodes(d));km+=r.km;h+=r.h;est=est||r.est});
+  const parts=[];if(days.length)parts.push(`${fmtShort(days[0])} – ${fmtShort(days[days.length-1])} · <b>${days.length}</b> days`);
+  parts.push(`<b>${items.length}</b> entries`);parts.push(`${est?"≈ ":""}<b>${fmtKm(km)}</b> driving · <b>${fmtH(h)}</b>`);
+  $("#tripMeta").innerHTML=parts.map(p=>`<span>${p}</span>`).join("");
+  ["list","cal","map"].forEach(v=>$("#v"+{list:"List",cal:"Cal",map:"Map"}[v]).setAttribute("aria-pressed",view===v));
+}
+function stopHTML(node,day){
+  const it=node.item,t=it.type||"other";let time=it.time||"";const sub=[];
+  if(node.role==="start"){time="start";sub.push("Leaving from your hotel")}
+  if(node.role==="night"){time=it.date===day?(it.time||"check-in"):"night";sub.push(it.date===day?"Check-in":"Overnight")}
+  if(node.role==="stay"){time="all day";sub.push("Staying here")}
+  if(t==="hotel"&&it.endDate)sub.push(`${fmtShort(it.date)} → ${fmtShort(it.endDate)}`);
+  if(it.endTime&&t!=="hotel")time+=time?"–"+it.endTime:it.endTime;
+  if(it.place)sub.push(esc(it.place));
+  const anchor=["start","night","stay"].includes(node.role)?" anchor":"";
+  return `<button class="stop t-${t}${anchor}" data-id="${esc(it.id)}"><span class="stop-time">${esc(time)||"—"}</span><span class="stop-body"><span class="stop-title">${esc(it.title||"Untitled")}</span><span class="stop-sub">${sub.join(" · ")}</span></span><span class="tag">${TYPES[t]||"Other"}</span></button>`;
+}
+function legHTML(l){
+  if(l.same)return `<div class="leg"><span class="leg-line"></span><span></span></div>`;
+  if(l.missing)return `<div class="leg"><span class="leg-line"></span><span class="leg-info">No location for one of these stops</span></div>`;
+  return `<div class="leg"><span class="leg-line"></span><span class="leg-info"><span class="${l.est?"est":""}">${l.est?"≈ ":""}<strong>${fmtKm(l.km)}</strong> · <strong>${fmtH(l.h)}</strong></span>
+    <a class="btn waze" href="${nav.waze(l.b)}" target="_blank" rel="noopener">Waze</a><a class="btn" href="${nav.google(l.b,l.a)}" target="_blank" rel="noopener">Google</a><a class="btn" href="${nav.apple(l.b,l.a)}" target="_blank" rel="noopener">Apple</a></span></div>`;
+}
+function renderList(){
+  const days=tripDays();if(!days.length&&!items.length)return `<p class="note">No entries published yet.</p>`;
+  let html="";
+  days.forEach((d,ix)=>{
+    const nodes=dayNodes(d),{legs,km,h,est}=dayLegs(nodes);
+    const pts=nodes.filter(n=>hasLoc(n.item)).map(n=>n.item).filter((p,i,a)=>i===0||p.id!==a[i-1].id);
+    html+=`<section class="day" id="day-${d}"><div class="day-head"><span class="day-no">Day ${ix+1}</span><h2>${fmtDay(d)}</h2><span class="day-drive">${km>0?`${est?"≈ ":""}${fmtKm(km)} · ${fmtH(h)}`:""}</span>
+      ${pts.length>1?`<span class="day-tools"><a class="btn" href="${nav.googleDay(pts)}" target="_blank" rel="noopener">Whole day in Google Maps</a><button class="btn" data-gpx="${d}">GPX</button></span>`:""}</div><div class="stops">`;
+    if(!nodes.length)html+=`<p class="note">Nothing planned.</p>`;
+    nodes.forEach((n,k)=>{if(k)html+=legHTML(legs[k-1]);html+=stopHTML(n,d)});
+    html+=`</div></section>`;
+  });
+  const ideas=items.filter(i=>!i.date);
+  if(ideas.length)html+=`<section class="ideas"><h2>Ideas, not scheduled</h2><div class="stops">${ideas.map(i=>stopHTML({item:i,role:"idea"})).join("")}</div></section>`;
+  return html;
+}
+function renderCal(){
+  const days=tripDays();if(!days.length)return `<p class="note">No dates yet.</p>`;
+  const inTrip=new Set(days),start=toD(days[0]),end=toD(days[days.length-1]);
+  start.setUTCDate(start.getUTCDate()-((start.getUTCDay()+6)%7));end.setUTCDate(end.getUTCDate()+(6-((end.getUTCDay()+6)%7)));
+  let html=`<div class="cal">`+["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(d=>`<div class="cal-dow">${d}</div>`).join("");
+  for(let d=new Date(start);d<=end;d.setUTCDate(d.getUTCDate()+1)){
+    const s=fromD(d);if(!inTrip.has(s)){html+=`<div class="cell out"><div class="cell-num"><span>${d.getUTCDate()}</span></div></div>`;continue}
+    const {km}=dayLegs(dayNodes(s)),night=hotelForNight(s);
+    const chips=items.filter(i=>i.type!=="hotel"&&i.date===s).sort((a,b)=>(a.time||"99").localeCompare(b.time||"99")).map(i=>`<span class="chip t-${i.type}">${esc((i.time?i.time+" ":"")+(i.title||""))}</span>`).join("");
+    html+=`<button class="cell" data-day="${s}"><span class="cell-num"><span>${d.getUTCDate()}</span><span>${km>0?Math.round(km)+" km":""}</span></span>${chips}${night?`<span class="chip t-hotel">${esc(night.title)}</span>`:""}</button>`;
+  }
+  return html+`</div>`;
+}
+
+// ---------- map ----------
+let map=null,layer=null,fitted=false,mapDay="";
+function initMap(){
+  if(map||!window.L)return!!map;
+  map=L.map("map",{zoomSnap:.5}).setView([-33.4,-71],6);
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors · Routing <a href="https://project-osrm.org">OSRM</a>'}).addTo(map);
+  layer=L.layerGroup().addTo(map);
+  map.on("popupopen",e=>{const b=e.popup.getElement()?.querySelector("[data-id]");if(b)b.onclick=()=>{map.closePopup();openDetail(b.dataset.id)}});
+  return true;
+}
+const pin=(it,label,idea)=>L.divIcon({className:`pin t-${it.type||"other"}${idea?" idea":""}`,html:`<b>${esc(label)}</b>`,iconSize:[26,26],iconAnchor:[13,13],popupAnchor:[0,-13]});
+function updateMap(){
+  if(!initMap()){$("#mapSum").textContent="The map didn't load. Check your connection.";return}
+  map.invalidateSize();layer.clearLayers();
+  const days=tripDays(),sel=$("#mapDay");
+  const opts=`<option value="">All days</option>`+days.map((d,i)=>`<option value="${d}">Day ${i+1} · ${fmtDay(d)}</option>`).join("");
+  if(sel.dataset.sig!==opts){sel.innerHTML=opts;sel.dataset.sig=opts}sel.value=mapDay;
+  const bounds=[],placed=new Map();let km=0,h=0;
+  (mapDay?[mapDay]:days).forEach(d=>{
+    const di=days.indexOf(d),cls="d"+(di%6+1),nodes=dayNodes(d),r=dayLegs(nodes);km+=r.km;h+=r.h;
+    if(r.route&&r.route.geom)L.polyline(r.route.geom.map(([a,b])=>[b,a]),{className:"route "+cls,interactive:false}).addTo(layer);
+    else{const p=nodes.filter(n=>hasLoc(n.item)).map(n=>[+n.item.lat,+n.item.lng]);if(p.length>1)L.polyline(p,{className:"route est "+cls,interactive:false}).addTo(layer)}
+    nodes.forEach(n=>{if(!hasLoc(n.item))return;const e=placed.get(n.item.id);if(!e)placed.set(n.item.id,{it:n.item,days:[di+1]});else if(!e.days.includes(di+1))e.days.push(di+1)});
+  });
+  placed.forEach(({it,days:ds})=>{const lab=ds.length>1?ds[0]+"–"+ds[ds.length-1]:String(ds[0]);
+    L.marker([+it.lat,+it.lng],{icon:pin(it,lab),title:it.title}).bindPopup(`<b>${esc(it.title)}</b>${esc(it.place||"")}<br><button class="btn" data-id="${esc(it.id)}">Details & navigate</button>`).addTo(layer);bounds.push([+it.lat,+it.lng])});
+  if(!mapDay)items.filter(i=>!i.date&&hasLoc(i)).forEach(it=>{L.marker([+it.lat,+it.lng],{icon:pin(it,"?",true),title:it.title}).bindPopup(`<b>${esc(it.title)}</b><button class="btn" data-id="${esc(it.id)}">Details & navigate</button>`).addTo(layer);bounds.push([+it.lat,+it.lng])});
+  $("#mapSum").textContent=km?`${fmtKm(km)} · ${fmtH(h)} driving`:"";
+  if(!fitted&&bounds.length){bounds.length===1?map.setView(bounds[0],11):map.fitBounds(bounds,{padding:[40,40],maxZoom:12});fitted=true}
+}
+$("#mapDay").addEventListener("change",e=>{mapDay=e.target.value;fitted=false;updateMap()});
+
+// ---------- detail drawer ----------
+function openDetail(id){
+  const it=items.find(i=>i.id===id);if(!it)return;
+  const when=it.date?(it.type==="hotel"&&it.endDate?`${fmtDay(it.date)} → ${fmtDay(it.endDate)}`:fmtDay(it.date)+(it.time?" · "+it.time+(it.endTime?"–"+it.endTime:""):"")):"Not scheduled";
+  $("#overlay").innerHTML=`<div class="scrim" id="scrim"><div class="drawer" role="dialog" aria-label="${esc(it.title)}">
+    <span class="tag t-${it.type||"other"}" style="align-self:start">${TYPES[it.type]||"Other"}</span>
+    <h2>${esc(it.title)}</h2><div class="note">${esc(when)}${it.place?"<br>"+esc(it.place):""}</div>
+    ${it.notes?`<p style="margin:0;white-space:pre-wrap">${esc(it.notes)}</p>`:""}
+    ${it.url?`<a href="${esc(it.url)}" target="_blank" rel="noopener">Open link ↗</a>`:""}
+    ${hasLoc(it)?`<div class="note" style="margin-top:6px">Navigate here from your current location</div>
+      <div class="navgrid"><a class="btn waze" href="${nav.waze(it)}" target="_blank" rel="noopener">Waze</a><a class="btn" href="${nav.google(it)}" target="_blank" rel="noopener">Google Maps</a>
+      <a class="btn" href="${nav.apple(it)}" target="_blank" rel="noopener">Apple Maps</a><a class="btn" href="${nav.osm(it)}" target="_blank" rel="noopener">OpenStreetMap</a></div>
+      <div class="coords">${ll(it)}</div><button class="btn" id="copyCoords" style="align-self:start">Copy coordinates</button>`:`<p class="note">No location for this entry.</p>`}
+    <button class="btn" id="closeD" style="align-self:start;margin-top:auto">Close</button></div></div>`;
+  $("#closeD").onclick=closeDetail;$("#scrim").addEventListener("mousedown",e=>{if(e.target.id==="scrim")closeDetail()});
+  const c=$("#copyCoords");if(c)c.onclick=()=>navigator.clipboard?.writeText(ll(it)).then(()=>toast("Copied"),()=>toast(ll(it)));
+}
+function closeDetail(){$("#overlay").innerHTML=""}
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeDetail()});
+
+// ---------- events ----------
+document.addEventListener("click",e=>{
+  const s=e.target.closest(".stop");if(s){openDetail(s.dataset.id);return}
+  const g=e.target.closest("[data-gpx]");if(g){const n=dayNodes(g.dataset.gpx);gpx(g.dataset.gpx,n,dayLegs(n).route?.geom);return}
+  const c=e.target.closest(".cell[data-day]");if(c){setView("list");requestAnimationFrame(()=>document.getElementById("day-"+c.dataset.day)?.scrollIntoView({behavior:"smooth"}))}
+});
+function setView(v){view=v;try{localStorage.setItem("cts_view",v)}catch(e){}if(v==="map")fitted=false;render()}
+$("#vList").onclick=()=>setView("list");$("#vCal").onclick=()=>setView("cal");$("#vMap").onclick=()=>setView("map");
+
+function render(){
+  renderHeader();const m=view==="map";$("#view").hidden=m;$("#mapView").hidden=!m;
+  if(m)updateMap();else $("#view").innerHTML=view==="list"?renderList():renderCal();
+  $("#foot").innerHTML=syncedAt?`Last updated ${new Date(syncedAt).toLocaleString("en-GB",{dateStyle:"medium",timeStyle:"short"})}. Road distances from OSRM; amber “≈” values are estimates until the route loads.`:"";
+}
+
+// ---------- data source (swap this for a database later to make the site editable) ----------
+async function loadTrip(){
+  const r=await fetch("data/trip.json?v="+Date.now(),{cache:"no-store"});if(!r.ok)throw new Error(r.status);return r.json();
+}
+loadTrip().then(t=>{items=t.items||[];settings={...settings,...(t.settings||{})};syncedAt=t.syncedAt||"";render()})
+  .catch(()=>{$("#tripMeta").textContent="Couldn't load the trip data. Reload to try again."});
+</script>
+</body>
+</html>
