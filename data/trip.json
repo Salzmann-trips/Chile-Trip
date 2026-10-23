@@ -19,14 +19,6 @@
    "lng": -71.9
   },
   {
-   "id": "264d3xu5yubo53nzhaba",
-   "type": "poi",
-   "title": "TEST sync",
-   "place": "Santiago (Centro)",
-   "lat": -33.4372,
-   "lng": -70.6506
-  },
-  {
    "id": "2jqy0jwuvun3cuheyt2m",
    "type": "hotel",
    "title": "Hotel Director",
@@ -35,13 +27,6 @@
    "place": "Hotel Director, Santiago, Vitacura",
    "lat": -33.401,
    "lng": -70.583
-  },
-  {
-   "id": "4oz5bdyunmuq6dso5fhh",
-   "type": "hotel",
-   "title": "Hotel Double tree",
-   "date": "2026-11-10",
-   "endDate": "2026-11-22"
   },
   {
    "id": "8yba0mrp0vc83ifs8f5s",
@@ -57,6 +42,8 @@
    "id": "99mu3to4xhgav34o0s6m",
    "type": "poi",
    "title": "El Yeso",
+   "date": "2026-11-08",
+   "endDate": "2026-11-08",
    "place": "Embalse El Yeso",
    "lat": -33.676,
    "lng": -70.088
@@ -73,6 +60,10 @@
    "id": "pylioz5qlbvqe1clg7q6",
    "type": "poi",
    "title": "punto de lobos",
+   "date": "2026-11-15",
+   "time": "08:00",
+   "endDate": "2026-11-15",
+   "endTime": "18:00",
    "place": "punto de Lobos",
    "lat": -34.4417,
    "lng": -72.0233
@@ -103,6 +94,8 @@
    "id": "y5abjq2i94e50ttsjw6m",
    "type": "poi",
    "title": "Vulcan Area",
+   "date": "2026-11-08",
+   "endDate": "2026-11-08",
    "place": "vulcan",
    "lat": -33.6333,
    "lng": -70.35
@@ -116,5 +109,5 @@
    "lng": -70.25
   }
  ],
- "syncedAt": "2026-10-23T14:00:49Z"
+ "syncedAt": "2026-10-23T14:59:24Z"
 }
