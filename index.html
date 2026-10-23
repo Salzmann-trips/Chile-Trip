@@ -143,6 +143,15 @@ main{padding-block:20px 60px}
 .sg-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .sg-status{font-size:.85rem;color:var(--muted)}
 .sg-status.bad{color:#b3261e}
+
+.sg-mapwrap{display:flex;flex-direction:column;gap:6px}
+#sgMap{position:relative;z-index:0;height:min(60vh,520px);min-height:320px;border-radius:var(--r);border:1px solid var(--line)}
+.sg-maplegend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.8rem;color:var(--muted)}
+.sg-maplegend i{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--c);margin-right:5px;vertical-align:-1px}
+.sgpin b{background:var(--copper)!important}
+.sgdot{stroke:var(--surface);stroke-width:2;fill-opacity:1}
+.sgdot.t-event{fill:var(--copper)} .sgdot.t-poi{fill:var(--poi)} .sgdot.t-other{fill:var(--other)} .sgdot.t-hotel{fill:var(--hotel)}
+.route.sgr{stroke-width:3.5;stroke-dasharray:none;stroke-opacity:.85}
 /* Suggested route */
 .sg{display:flex;flex-direction:column;gap:18px}
 .sg-intro h2{font-family:var(--f-display);font-size:1.5rem;margin:0 0 6px}
@@ -445,10 +454,13 @@ function render(){
   renderCover();
   renderHeader();const m=view==="map";$("#view").hidden=m;$("#mapView").hidden=!m;
   if(m)updateMap();else $("#view").innerHTML=view==="list"?renderList():view==="sug"?renderSuggestion(suggestion):renderCal();
+  if(view==="sug")sgMountMap(suggestion);else if(sgMap){sgMap.remove();sgMap=null}
   $("#foot").innerHTML=syncedAt?`Last updated ${new Date(syncedAt).toLocaleString("en-GB",{dateStyle:"medium",timeStyle:"short"})}. Road distances from OSRM; amber “≈” values are estimates until the route loads.`:"";
 }
 
 let suggestion=null;
+function sgBaseLayer(map){L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map)}
+function sgOpenEntry(id){openDetail(id)}
 
 // ---------- Links to learn more about a place ----------
 function infoQuery(it){
@@ -498,7 +510,7 @@ function sgDayRoute(sg, si, di){
   const pts = [start, ...stops, end].filter(Boolean).filter((p,k,a)=>k===0 || sgKm(a[k-1],p)>1);
   let km=0; for (let k=1;k<pts.length;k++) km += sgKm(pts[k-1], pts[k]);
   const maps = pts.length>1 ? `https://www.google.com/maps/dir/?api=1&origin=${sgLL(pts[0])}&destination=${sgLL(pts[pts.length-1])}${pts.length>2?"&waypoints="+pts.slice(1,-1).slice(0,9).map(sgLL).join("%7C"):""}&travelmode=driving` : "";
-  return {km, h: km/(+settings.speed||65), maps};
+  return {km, h: km/(+settings.speed||65), maps, pts};
 }
 function sgPlanHotel(st){
   const last = addDays(st.from, st.nights-1);
@@ -511,6 +523,46 @@ function sgMissingHTML(sg){
   if (!missing.length) return ctl ? `<div class="sg-actions">${ctl}</div>` : "";
   const chips = missing.map(it=>`<button class="sg-chip t-${it.type||"other"}" data-id="${esc(it.id)}" type="button">${esc(it.title||"Untitled")}<em>${it.date?esc(fmtShort(it.date)):"idea"}</em></button>`).join("");
   return `<div class="sg-missing"><h3>Not in the suggestion yet (${missing.length})</h3><p>These entries were added after the route was suggested${ctl?". Update the suggestion to work them in.":"."}</p><div class="sg-chips">${chips}</div>${ctl}</div>`;
+}
+
+// ---------- Map of the suggested route ----------
+let sgMap = null, sgMapView = null;
+function sgMapPoints(sg){
+  // Per stage: ordered points of all its days (start → stops → base), plus the stops shown as dots.
+  return sg.stages.map((st,si)=>{
+    const pts = []; const stops = [];
+    st.days.forEach((d,di)=>{
+      const r = sgDayRoute(sg, si, di);
+      r.pts.forEach(p=>{ if (!pts.length || sgKm(pts[pts.length-1], p) > 1) pts.push(p); });
+      (d.stops||[]).forEach(id=>{ const it=items.find(i=>i.id===id); if (it && hasLoc(it)) stops.push({it, date:d.date}); });
+    });
+    return {st, si, pts, stops};
+  });
+}
+function sgMountMap(sg){
+  const el = document.getElementById("sgMap");
+  if (sgMap){ try{ sgMapView = {key: sg && sg.createdAt + "|" + (sg.stages||[]).length, center: sgMap.getCenter(), zoom: sgMap.getZoom()}; sgMap.remove(); }catch(e){} sgMap = null; }
+  if (!el || !window.L || !sg || !sg.stages) return;
+  sgMap = L.map(el, {zoomSnap:.5, scrollWheelZoom:false});
+  sgBaseLayer(sgMap);
+  const bounds = [];
+  sgMapPoints(sg).forEach(({st, si, pts, stops})=>{
+    const cls = "route solid sgr d" + ((si % 6) + 1);
+    if (pts.length > 1) L.polyline(pts.map(p=>[+p.lat, +p.lng]), {className: cls, interactive:false}).addTo(sgMap);
+    stops.forEach(({it, date})=>{
+      L.circleMarker([+it.lat, +it.lng], {radius:6, className:"sgdot t-" + (it.type||"other")})
+        .bindPopup(`<b>${esc(it.title||"")}</b>${esc(fmtDay(date))} · stage ${si+1}<br><button class="btn" data-sgid="${esc(it.id)}" type="button">Open</button>`).addTo(sgMap);
+      bounds.push([+it.lat, +it.lng]);
+    });
+    const out = addDays(st.from, st.nights);
+    L.marker([+st.lat, +st.lng], {icon: L.divIcon({className:"pin sgpin", html:`<b>${si+1}</b>`, iconSize:[26,26], iconAnchor:[13,13], popupAnchor:[0,-13]}), title: st.base, zIndexOffset: 1000})
+      .bindPopup(`<b>${si+1}. ${esc(st.title)}</b>${esc(st.base)}<br>${esc(fmtShort(st.from))} → ${esc(fmtShort(out))} · ${st.nights} night${st.nights>1?"s":""}`).addTo(sgMap);
+    bounds.push([+st.lat, +st.lng]);
+  });
+  sgMap.on("popupopen", e=>{ const b = e.popup.getElement()?.querySelector("[data-sgid]"); if (b) b.onclick = ()=>{ sgMap.closePopup(); sgOpenEntry(b.dataset.sgid); }; });
+  const key = sg.createdAt + "|" + sg.stages.length;
+  if (sgMapView && sgMapView.key === key) sgMap.setView(sgMapView.center, sgMapView.zoom);
+  else if (bounds.length) sgMap.fitBounds(bounds, {padding:[30,30], maxZoom:10});
 }
 function renderSuggestion(sg){
   if (!sg || !Array.isArray(sg.stages) || !sg.stages.length)
@@ -539,6 +591,8 @@ function renderSuggestion(sg){
     <div class="sg-intro"><h2>${esc(sg.title||"Suggested route")}</h2><p>${esc(sg.intro||"")}</p>
       <div class="sg-sum"><span><b>${sg.stages.length}</b> bases</span><span><b>${nights}</b> nights</span><span>≈ <b>${Math.round(totKm).toLocaleString("en-GB")}</b> km · <b>${Math.round(totH)}</b> h driving</span></div>
       <p class="sg-basis">${esc(sg.basis||"")}${sg.createdAt?` Suggested ${esc(fmtShort(sg.createdAt))}.`:""} Hotel buttons open Booking.com searches for those dates; prices and availability are live there.</p></div>
+    <div class="sg-mapwrap"><div id="sgMap" role="region" aria-label="Map of the suggested route"></div>
+      <div class="sg-maplegend"><span>Numbered pins: where you sleep, in order</span><span class="t-event"><i></i>Event</span><span class="t-poi"><i></i>Place</span><span class="t-other"><i></i>Other</span><span>Lines: each stage's drives, as straight lines between stops</span></div></div>
     ${sgMissingHTML(sg)}
     ${notes?`<ul class="sg-notes">${notes}</ul>`:""}
     ${stagesHTML}
