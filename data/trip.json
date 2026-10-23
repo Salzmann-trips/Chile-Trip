@@ -76,6 +76,14 @@
    "lng": -70.088
   },
   {
+   "id": "d1d9foktss6uj1685hhp",
+   "type": "poi",
+   "title": "shopping mall sport",
+   "place": "mall sport las condes",
+   "lat": -33.4085,
+   "lng": -70.577
+  },
+  {
    "id": "mp3sfh41tzw3v07kwjex",
    "type": "poi",
    "title": "Portillo",
@@ -110,7 +118,7 @@
   {
    "id": "pylioz5qlbvqe1clg7q6",
    "type": "poi",
-   "title": "punto de lobos",
+   "title": "Pichilemu / Punto de Lobos",
    "date": "2026-11-15",
    "time": "08:00",
    "endDate": "2026-11-15",
@@ -160,5 +168,5 @@
    "lng": -70.25
   }
  ],
- "syncedAt": "2026-10-23T15:37:05Z"
+ "syncedAt": "2026-10-23T15:41:44Z"
 }
