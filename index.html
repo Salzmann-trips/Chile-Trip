@@ -206,7 +206,7 @@ const hotelForNight=d=>items.find(i=>i.type==="hotel"&&i.date&&i.date<=d&&d<(i.e
 function dayNodes(d){
   const nodes=[],morning=hotelForNight(addDays(d,-1)),night=hotelForNight(d);
   if(morning)nodes.push({item:morning,role:"start"});
-  const list=items.filter(i=>i.type!=="hotel"&&i.date===d).sort((a,b)=>(a.time||"99").localeCompare(b.time||"99")||(a.title||"").localeCompare(b.title||""));
+  const list=items.filter(i=>i.type!=="hotel"&&i.date===d).sort((a,b)=>(a.time||"99").localeCompare(b.time||"99")||((a.order??1e9)-(b.order??1e9))||(a.title||"").localeCompare(b.title||""));
   list.forEach(i=>nodes.push({item:i,role:"stop"}));
   if(night&&!(morning&&morning.id===night.id&&list.length===0))nodes.push({item:night,role:"night"});
   else if(night&&morning&&morning.id===night.id)nodes[0].role="stay";
@@ -297,7 +297,7 @@ function renderCal(){
   for(let d=new Date(start);d<=end;d.setUTCDate(d.getUTCDate()+1)){
     const s=fromD(d);if(!inTrip.has(s)){html+=`<div class="cell out"><div class="cell-num"><span>${d.getUTCDate()}</span></div></div>`;continue}
     const {km}=dayLegs(dayNodes(s)),night=hotelForNight(s);
-    const chips=items.filter(i=>i.type!=="hotel"&&i.date===s).sort((a,b)=>(a.time||"99").localeCompare(b.time||"99")).map(i=>`<span class="chip t-${i.type}">${esc((i.time?i.time+" ":"")+(i.title||""))}</span>`).join("");
+    const chips=items.filter(i=>i.type!=="hotel"&&i.date===s).sort((a,b)=>(a.time||"99").localeCompare(b.time||"99")||((a.order??1e9)-(b.order??1e9))).map(i=>`<span class="chip t-${i.type}">${esc((i.time?i.time+" ":"")+(i.title||""))}</span>`).join("");
     html+=`<button class="cell" data-day="${s}"><span class="cell-num"><span>${d.getUTCDate()}</span><span>${km>0?Math.round(km)+" km":""}</span></span>${chips}${night?`<span class="chip t-hotel">${esc(night.title)}</span>`:""}</button>`;
   }
   return html+`</div>`;
