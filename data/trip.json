@@ -62,7 +62,8 @@
    "time": "07:30",
    "place": "Cahuil",
    "lat": -34.2833,
-   "lng": -71.9833
+   "lng": -71.9833,
+   "order": 0
   },
   {
    "id": "2wj0e5b7etf90v45y5te",
@@ -79,7 +80,8 @@
    "date": "2026-11-15",
    "place": "la boca, chile",
    "lat": -33.9231462,
-   "lng": -71.8474541
+   "lng": -71.8474541,
+   "order": 0
   },
   {
    "id": "8yba0mrp0vc83ifs8f5s",
@@ -107,7 +109,8 @@
    "endDate": "2026-11-08",
    "place": "Embalse El Yeso",
    "lat": -33.676,
-   "lng": -70.088
+   "lng": -70.088,
+   "order": 0
   },
   {
    "id": "d1d9foktss6uj1685hhp",
@@ -132,7 +135,8 @@
    "date": "2026-11-16",
    "place": "Papudo",
    "lat": -32.5081,
-   "lng": -71.4457
+   "lng": -71.4457,
+   "order": 0
   },
   {
    "id": "fqdtnlo46ds5zxsnp185",
@@ -142,7 +146,8 @@
    "time": "08:30",
    "place": "Navidad",
    "lat": -34.1978,
-   "lng": -71.8428
+   "lng": -71.8428,
+   "order": 20
   },
   {
    "id": "gr6d04ojmn1dnc9rwkzx",
@@ -175,7 +180,8 @@
    "date": "2026-11-10",
    "place": "Portillo",
    "lat": -32.8355,
-   "lng": -70.1287
+   "lng": -70.1287,
+   "order": 0
   },
   {
    "id": "mr3aksxpnr0giwaeffur",
@@ -192,7 +198,8 @@
    "date": "2026-11-08",
    "place": "Camino al Volcán San José de Maipo Chile",
    "lat": -33.73037,
-   "lng": -70.315704
+   "lng": -70.315704,
+   "order": 20
   },
   {
    "id": "nwrpg5ybq2qghleq1xo4",
@@ -201,7 +208,8 @@
    "date": "2026-11-15",
    "place": "Valparaíso",
    "lat": -33.0472,
-   "lng": -71.6127
+   "lng": -71.6127,
+   "order": 10
   },
   {
    "id": "o69eszwa3xt670m7lw5z",
@@ -210,7 +218,8 @@
    "date": "2026-11-09",
    "place": "Putaendo",
    "lat": -32.6167,
-   "lng": -70.7333
+   "lng": -70.7333,
+   "order": 0
   },
   {
    "id": "pylioz5qlbvqe1clg7q6",
@@ -220,7 +229,8 @@
    "time": "08:30",
    "place": "punto de Lobos",
    "lat": -34.4417,
-   "lng": -72.0233
+   "lng": -72.0233,
+   "order": 0
   },
   {
    "id": "sb2kzp4gfu08bzd33cit",
@@ -268,7 +278,8 @@
    "endDate": "2026-11-08",
    "place": "vulcan",
    "lat": -33.6333,
-   "lng": -70.35
+   "lng": -70.35,
+   "order": 10
   },
   {
    "id": "zewfe6dedinpzzm8o25z",
@@ -287,5 +298,307 @@
    "lng": -70.25
   }
  ],
- "syncedAt": "2026-10-23T17:53:38Z"
+ "suggestion": {
+  "title": "Suggested route",
+  "createdAt": "2026-10-23",
+  "basis": "Built from all 29 places and events in the planner, scheduled or not (Creamfields is offered as an option because it clashes with the surf event).",
+  "intro": "A north-then-south loop: Andes near Santiago first, then the Aconcagua valley and the northern coast, the surf coast around Matanzas and Pichilemu, the Maule wine valley and coast, and back to Santiago via Rancagua. Most days have one to two hours of driving, with a few longer transfer days of three hours or more. It's only an idea; your planner stays as it is.",
+  "notes": [
+   {
+    "kind": "conflict",
+    "text": "Creamfields (Sat 14 and Sun 15 Nov, Club Hípico de Santiago) clashes with the 5-Star Surf event at Matanzas on Sat 14. If you want Creamfields: drive Matanzas → Santiago on Sun 15 (about 2.5 h), sleep in Santiago, and go on to Pichilemu on Mon 16. That costs one night in Pichilemu."
+   },
+   {
+    "kind": "tip",
+    "text": "Sewell sits inside an active copper mine and can only be visited on an organised tour. Tours leave from Rancagua (Fundación Sewell, Gamero 0400), take about 8 hours and are for ages 7 to 75, so book ahead. That's why Sewell moved from 7 Nov to the end of the trip, when you pass Rancagua anyway."
+   },
+   {
+    "kind": "tip",
+    "text": "Persa Bio Bio is only open at weekends (Sat and Sun, 09:00–18:00), so it fits Saturday 7 Nov on the way to the Cajón del Maipo."
+   },
+   {
+    "kind": "tip",
+    "text": "Mountain roads (El Yeso, Portillo, Valle Nevado) can still have snow in November. Check road status before you go, and carry chains if Carabineros ask for them."
+   }
+  ],
+  "stages": [
+   {
+    "base": "Santiago (Providencia / Vitacura)",
+    "days": [
+     {
+      "date": "2026-11-05",
+      "stops": [
+       "x799gh98l9r4zhy9uudl",
+       "2wj0e5b7etf90v45y5te"
+      ],
+      "text": "Land 07:15, pick up the car, check in and rest. Late afternoon in the old town: Plaza de Armas, Cerro Santa Lucía."
+     },
+     {
+      "date": "2026-11-06",
+      "stops": [
+       "zohmq6q35ent6pmr6npq",
+       "d1d9foktss6uj1685hhp"
+      ],
+      "text": "Day trip up the 40 curves to Valle Nevado for a high-altitude hike. Evening shopping at Mall Sport on the way back."
+     }
+    ],
+    "from": "2026-11-05",
+    "id": "s1",
+    "lat": -33.417,
+    "lng": -70.597,
+    "nights": 2,
+    "ss": "Providencia, Santiago, Chile",
+    "title": "Arrival & Santiago"
+   },
+   {
+    "base": "San José de Maipo / El Ingenio",
+    "days": [
+     {
+      "date": "2026-11-07",
+      "stops": [
+       "1d12kbwnhyib90wxetki",
+       "mskw28ttsdr3w4ilgz3k"
+      ],
+      "text": "Saturday morning at Persa Bio Bio (weekend flea market), then drive up the Maipo valley. Dinner at Pisco y Pebre."
+     },
+     {
+      "date": "2026-11-08",
+      "stops": [
+       "99mu3to4xhgav34o0s6m",
+       "y5abjq2i94e50ttsjw6m"
+      ],
+      "text": "Turquoise Embalse El Yeso in the morning light, then the San José volcano area and the thermal-spring road."
+     }
+    ],
+    "from": "2026-11-07",
+    "id": "s2",
+    "lat": -33.7683,
+    "lng": -70.2785,
+    "nights": 2,
+    "ss": "San José de Maipo, Chile",
+    "title": "Cajón del Maipo"
+   },
+   {
+    "base": "Los Andes",
+    "days": [
+     {
+      "date": "2026-11-09",
+      "stops": [
+       "o69eszwa3xt670m7lw5z"
+      ],
+      "text": "Longest transfer of the north loop: around Santiago to the quiet valley town of Putaendo, then on to Los Andes."
+     },
+     {
+      "date": "2026-11-10",
+      "stops": [
+       "mp3sfh41tzw3v07kwjex"
+      ],
+      "text": "Up Ruta 60 to Portillo and Laguna del Inca below Aconcagua. Back down for the evening."
+     }
+    ],
+    "from": "2026-11-09",
+    "id": "s3",
+    "lat": -32.834,
+    "lng": -70.598,
+    "nights": 2,
+    "ss": "Los Andes, Valparaíso, Chile",
+    "title": "Aconcagua valley"
+   },
+   {
+    "base": "Zapallar",
+    "days": [
+     {
+      "date": "2026-11-11",
+      "stops": [
+       "fmddhb380jctz46523sb",
+       "wls6170uttdkuhvkdcp6"
+      ],
+      "text": "Out to the Pacific: the coastal path in Zapallar and the beaches of Papudo."
+     }
+    ],
+    "from": "2026-11-11",
+    "id": "s4",
+    "lat": -32.553,
+    "lng": -71.46,
+    "nights": 1,
+    "ss": "Zapallar, Chile",
+    "title": "Zapallar & Papudo"
+   },
+   {
+    "base": "Olmué",
+    "days": [
+     {
+      "date": "2026-11-12",
+      "stops": [
+       "05i62qdklnte013kb86x",
+       "io41b55l0jkbrg7s6aqp"
+      ],
+      "text": "Early start for the La Campana hike (Darwin climbed it in 1834). Relaxed evening in Olmué."
+     }
+    ],
+    "from": "2026-11-12",
+    "id": "s5",
+    "lat": -32.9833,
+    "lng": -71.1833,
+    "nights": 1,
+    "ss": "Olmué, Chile",
+    "title": "La Campana & Olmué"
+   },
+   {
+    "base": "Matanzas / Navidad",
+    "days": [
+     {
+      "date": "2026-11-13",
+      "stops": [
+       "nwrpg5ybq2qghleq1xo4"
+      ],
+      "text": "Morning in Valparaíso: funiculars, Cerro Alegre and Concepción. Afternoon drive down the coast to Matanzas."
+     },
+     {
+      "date": "2026-11-14",
+      "stops": [
+       "0cucd0k1l15kw9n1bnmi"
+      ],
+      "text": "5-Star Surf event at Matanzas, all day."
+     },
+     {
+      "date": "2026-11-15",
+      "endStage": "s7",
+      "stops": [
+       "fqdtnlo46ds5zxsnp185",
+       "54z6ahheoksz0jwlmssz"
+      ],
+      "text": "Navidad and the La Boca river mouth, then south to Pichilemu."
+     }
+    ],
+    "from": "2026-11-13",
+    "id": "s6",
+    "lat": -34.15,
+    "lng": -71.88,
+    "nights": 2,
+    "ss": "Navidad, O'Higgins, Chile",
+    "title": "Valparaíso & the surf coast"
+   },
+   {
+    "base": "Pichilemu",
+    "days": [
+     {
+      "date": "2026-11-16",
+      "stops": [
+       "pylioz5qlbvqe1clg7q6",
+       "2o99egr3hnn07rtegjxw"
+      ],
+      "text": "Punta de Lobos in the morning, then the salt pans and lagoon at Cáhuil."
+     }
+    ],
+    "from": "2026-11-15",
+    "id": "s7",
+    "lat": -34.387,
+    "lng": -72.003,
+    "nights": 2,
+    "ss": "Pichilemu, Chile",
+    "title": "Pichilemu"
+   },
+   {
+    "base": "Talca",
+    "days": [
+     {
+      "date": "2026-11-17",
+      "stops": [
+       "wo6wfgruth7hz3lsoeyr"
+      ],
+      "text": "Inland through the Curicó and Maule valleys, with a winery stop or two off the beaten path."
+     }
+    ],
+    "from": "2026-11-17",
+    "id": "s8",
+    "lat": -35.426,
+    "lng": -71.655,
+    "nights": 1,
+    "ss": "Talca, Chile",
+    "title": "Maule wine valley"
+   },
+   {
+    "base": "Pelluhue",
+    "days": [
+     {
+      "date": "2026-11-18",
+      "stops": [
+       "ffifjmr7qt8dkxzlerm3",
+       "gr6d04ojmn1dnc9rwkzx"
+      ],
+      "text": "To the coast: the Chanco dunes and reserve, then Pelluhue."
+     },
+     {
+      "date": "2026-11-19",
+      "stops": [
+       "mr3aksxpnr0giwaeffur"
+      ],
+      "text": "Fishing village and beaches of Curanipe."
+     }
+    ],
+    "from": "2026-11-18",
+    "id": "s9",
+    "lat": -35.8333,
+    "lng": -72.5333,
+    "nights": 2,
+    "ss": "Pelluhue, Chile",
+    "title": "Maule coast"
+   },
+   {
+    "base": "Rancagua",
+    "days": [
+     {
+      "date": "2026-11-20",
+      "stops": [
+       "jq6n18kxfu2qzmngeqvk",
+       "zewfe6dedinpzzm8o25z"
+      ],
+      "text": "Inland via Parral, Pablo Neruda's birthplace, then north on Ruta 5 to Rancagua. A long driving day."
+     }
+    ],
+    "from": "2026-11-20",
+    "id": "s10",
+    "lat": -34.17,
+    "lng": -70.744,
+    "nights": 1,
+    "ss": "Rancagua, Chile",
+    "title": "Rural Chile & Rancagua"
+   },
+   {
+    "base": "Santiago (near the airport or Providencia)",
+    "days": [
+     {
+      "date": "2026-11-21",
+      "stops": [
+       "sb2kzp4gfu08bzd33cit"
+      ],
+      "text": "Guided tour to Sewell, the 'city of stairs', from Rancagua (about 8 h, bus from Rancagua). Drive to Santiago in the evening.",
+      "tour": [
+       "sb2kzp4gfu08bzd33cit"
+      ]
+     },
+     {
+      "date": "2026-11-22",
+      "noReturn": true,
+      "stops": [
+       "2agpt738f2mdyeszccq0"
+      ],
+      "text": "Slow morning (Persa Bio Bio is open on Sundays too), return the car and fly at 18:05. Be at the airport about 3 h before an international flight."
+     }
+    ],
+    "from": "2026-11-21",
+    "id": "s11",
+    "lat": -33.426,
+    "lng": -70.611,
+    "nights": 1,
+    "ss": "Santiago, Chile",
+    "title": "Sewell & last night"
+   }
+  ],
+  "skipped": [
+   "90aebkbi56u1x2ukusmj"
+  ]
+ },
+ "syncedAt": "2026-10-23T18:43:38Z"
 }
