@@ -6,6 +6,7 @@ Usage:  python3 tools/sync.py <export_dir> [--include-notes] [--include-examples
 <export_dir> is the folder written by reading the planner's database with an out_dir:
   <export_dir>/items/<id>.json      one file per entry
   <export_dir>/trip/settings.json   trip name, dates, road factor, speed
+  <export_dir>/trip/suggestion.json optional suggested route (shown on the Suggestion tab)
 
 The public site gets only the fields it needs. Costs are never published; notes only
 with --include-notes (they may hold booking numbers). Example entries are skipped
@@ -50,9 +51,18 @@ def main():
             out["notes"] = d["notes"]
         items.append(out)
 
+    # Optional suggested route (written by Claude into trip/suggestion); it holds no private fields.
+    suggestion = None
+    gfile = src / "trip" / "suggestion.json"
+    if gfile.exists():
+        g = body(gfile)[1]
+        if isinstance(g, dict) and isinstance(g.get("stages"), list):
+            suggestion = {k: g[k] for k in ("title", "createdAt", "basis", "intro", "notes", "stages", "skipped") if k in g}
+
     trip = {
         "settings": {k: settings.get(k) for k in ("title", "start", "end", "factor", "speed")},
         "items": items,
+        "suggestion": suggestion,
         "syncedAt": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
     }
     dest = root / "data" / "trip.json"

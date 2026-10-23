@@ -126,6 +126,44 @@ main{padding-block:20px 60px}
   .cover-inner{z-index:2}
 }
 .cover-cue:hover{opacity:1;text-decoration:underline}
+
+/* Suggested route */
+.sg{display:flex;flex-direction:column;gap:18px}
+.sg-intro h2{font-family:var(--f-display);font-size:1.5rem;margin:0 0 6px}
+.sg-intro p{margin:0 0 10px;max-width:68ch}
+.sg-sum{display:flex;flex-wrap:wrap;gap:6px 18px;font-family:var(--f-mono);font-size:.85rem;color:var(--muted);margin-bottom:8px}
+.sg-sum b{color:var(--fg);font-weight:500}
+.sg-basis{color:var(--muted);font-size:.82rem}
+.sg-notes{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.sg-note{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--poi);border-radius:var(--r);padding:10px 12px;font-size:.88rem}
+.sg-note.warn{border-left-color:var(--warn)}
+.sg-note b{display:block;font-size:.72rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.sg-stage{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.sg-head{display:flex;gap:12px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line);background:var(--sunken)}
+.sg-no{flex:none;width:30px;height:30px;border-radius:50%;background:var(--copper);color:#fff;display:flex;align-items:center;justify-content:center;font:600 .85rem/1 var(--f-mono)}
+.sg-head h3{margin:0;font-family:var(--f-display);font-size:1.12rem}
+.sg-meta{color:var(--muted);font-size:.82rem}
+.sg-days{list-style:none;margin:0;padding:6px 14px}
+.sg-day{display:grid;grid-template-columns:96px 1fr;gap:12px;padding:10px 0;border-bottom:1px dashed var(--line)}
+.sg-day:last-child{border-bottom:0}
+.sg-date{font-family:var(--f-mono);font-size:.8rem;color:var(--muted);padding-top:2px}
+.sg-daybody{min-width:0}
+.sg-daybody p{margin:0 0 6px}
+.sg-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.sg-chip{display:inline-flex;align-items:baseline;gap:6px;border:1px solid var(--line);border-left:3px solid var(--c);background:var(--cs);border-radius:6px;padding:3px 8px;font-size:.8rem;cursor:pointer;color:var(--fg);text-align:left}
+.sg-chip em{font-style:normal;color:var(--muted);font-size:.72rem}
+.sg-drive{font-family:var(--f-mono);font-size:.78rem;color:var(--muted)}
+.sg-drive a{font-family:var(--f-body)}
+.sg-hotels{padding:12px 14px 14px;border-top:1px solid var(--line);background:color-mix(in srgb,var(--hotel-soft) 55%,var(--surface))}
+.sg-hotels-head{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;margin-bottom:8px}
+.sg-hotels-head span{color:var(--muted);font-size:.82rem}
+.sg-booked{font-size:.85rem;margin-bottom:8px;color:var(--hotel)}
+.sg-cats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.sg-cat{display:flex;flex-direction:column;gap:2px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);text-decoration:none;color:var(--fg);min-width:0}
+.sg-cat:hover{border-color:var(--hotel)}
+.sg-cat b{font-size:.86rem}
+.sg-cat span{font-size:.72rem;color:var(--muted)}
+@media (max-width:700px){ .sg-cats{grid-template-columns:repeat(2,minmax(0,1fr))} .sg-day{grid-template-columns:1fr;gap:4px} }
 [hidden]{display:none!important}
 </style>
 </head>
@@ -143,7 +181,7 @@ main{padding-block:20px 60px}
 <header class="top"><div class="wrap">
   <div><h1 class="trip-name" id="tripName">Chile trip</h1><div class="trip-meta" id="tripMeta">Loading…</div></div>
   <div class="seg" role="group" aria-label="View">
-    <button id="vList" aria-pressed="true">List</button><button id="vCal" aria-pressed="false">Calendar</button><button id="vMap" aria-pressed="false">Map</button>
+    <button id="vList" aria-pressed="true">List</button><button id="vCal" aria-pressed="false">Calendar</button><button id="vMap" aria-pressed="false">Map</button><button id="vSug" aria-pressed="false">Suggestion</button>
   </div>
 </div></header>
 <main class="wrap">
@@ -254,7 +292,7 @@ function renderHeader(){
   const parts=[];if(days.length)parts.push(`${fmtShort(days[0])} – ${fmtShort(days[days.length-1])} · <b>${days.length}</b> days`);
   parts.push(`<b>${items.length}</b> entries`);parts.push(`${est?"≈ ":""}<b>${fmtKm(km)}</b> driving · <b>${fmtH(h)}</b>`);
   $("#tripMeta").innerHTML=parts.map(p=>`<span>${p}</span>`).join("");
-  ["list","cal","map"].forEach(v=>$("#v"+{list:"List",cal:"Cal",map:"Map"}[v]).setAttribute("aria-pressed",view===v));
+  ["list","cal","map","sug"].forEach(v=>$("#v"+{list:"List",cal:"Cal",map:"Map",sug:"Sug"}[v]).setAttribute("aria-pressed",view===v));
 }
 function stopHTML(node,day){
   const it=node.item,t=it.type||"other";let time=it.time||"";const sub=[];
@@ -357,12 +395,13 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")closeDetail()});
 
 // ---------- events ----------
 document.addEventListener("click",e=>{
+  const sgc=e.target.closest(".sg-chip");if(sgc){openDetail(sgc.dataset.id);return}
   const s=e.target.closest(".stop");if(s){openDetail(s.dataset.id);return}
   const g=e.target.closest("[data-gpx]");if(g){const n=dayNodes(g.dataset.gpx);gpx(g.dataset.gpx,n,dayLegs(n).route?.geom);return}
   const c=e.target.closest(".cell[data-day]");if(c){setView("list");requestAnimationFrame(()=>document.getElementById("day-"+c.dataset.day)?.scrollIntoView({behavior:"smooth"}))}
 });
 function setView(v){view=v;try{localStorage.setItem("cts_view",v)}catch(e){}if(v==="map")fitted=false;render()}
-$("#vList").onclick=()=>setView("list");$("#vCal").onclick=()=>setView("cal");$("#vMap").onclick=()=>setView("map");
+$("#vList").onclick=()=>setView("list");$("#vCal").onclick=()=>setView("cal");$("#vMap").onclick=()=>setView("map");$("#vSug").onclick=()=>setView("sug");
 
 
 // ---------- Cover ----------
@@ -388,15 +427,81 @@ document.getElementById("cvCue").addEventListener("click", ()=>document.querySel
 function render(){
   renderCover();
   renderHeader();const m=view==="map";$("#view").hidden=m;$("#mapView").hidden=!m;
-  if(m)updateMap();else $("#view").innerHTML=view==="list"?renderList():renderCal();
+  if(m)updateMap();else $("#view").innerHTML=view==="list"?renderList():view==="sug"?renderSuggestion(suggestion):renderCal();
   $("#foot").innerHTML=syncedAt?`Last updated ${new Date(syncedAt).toLocaleString("en-GB",{dateStyle:"medium",timeStyle:"short"})}. Road distances from OSRM; amber “≈” values are estimates until the route loads.`:"";
+}
+
+let suggestion=null;
+
+// ---------- Suggested route (data: trip/suggestion) ----------
+const SG_CATS = [
+  {label:"Best value", hint:"rated 7+, cheapest first", q:"&nflt=review_score%3D70&order=price"},
+  {label:"Top rated", hint:"guest score 9+", q:"&nflt=review_score%3D90"},
+  {label:"4–5★ comfort", hint:"hotels with 4 or 5 stars", q:"&nflt=class%3D4%3Bclass%3D5"},
+  {label:"Cabins & B&Bs", hint:"B&Bs, holiday homes, chalets", q:"&nflt=ht_id%3D208%3Bht_id%3D220%3Bht_id%3D228"}
+];
+function sgBooking(st, cat){
+  const out = addDays(st.from, st.nights);
+  return `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(st.ss)}&checkin=${st.from}&checkout=${out}&group_adults=2&no_rooms=1&group_children=0&lang=en-gb${cat.q}`;
+}
+function sgKm(a,b){ const R=6371,r=x=>x*Math.PI/180,dLat=r(b.lat-a.lat),dLng=r(b.lng-a.lng);const h=Math.sin(dLat/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dLng/2)**2; return 2*R*Math.asin(Math.sqrt(h))*(+settings.factor||1.35); }
+const sgLL = p => `${(+p.lat).toFixed(5)},${(+p.lng).toFixed(5)}`;
+function sgFmtH(h){ const m=Math.round(h*60/5)*5; if(m<60) return m+" min"; const hh=Math.floor(m/60),mm=m%60; return hh+" h"+(mm?" "+String(mm).padStart(2,"0"):""); }
+function sgDayRoute(sg, si, di){
+  const st = sg.stages[si], day = st.days[di];
+  let start = null;
+  if (di===0 && si>0){ const prev = sg.stages[si-1]; start = {lat:prev.lat,lng:prev.lng,title:prev.base}; }
+  else if (!(si===0 && di===0)) start = {lat:st.lat,lng:st.lng,title:st.base};
+  if (si>0 && di===0 && sg.stages[si-1].days.some(d=>d.endStage===st.id)) start = {lat:st.lat,lng:st.lng,title:st.base};
+  const tour = new Set(day.tour||[]);
+  const stops = (day.stops||[]).map(id=>items.find(i=>i.id===id)).filter(i=>i && hasLoc(i) && !tour.has(i.id));
+  let end = null;
+  if (!day.noReturn){ const es = day.endStage ? sg.stages.find(s=>s.id===day.endStage) : st; end = {lat:es.lat,lng:es.lng,title:es.base}; }
+  const pts = [start, ...stops, end].filter(Boolean).filter((p,k,a)=>k===0 || sgKm(a[k-1],p)>1);
+  let km=0; for (let k=1;k<pts.length;k++) km += sgKm(pts[k-1], pts[k]);
+  const maps = pts.length>1 ? `https://www.google.com/maps/dir/?api=1&origin=${sgLL(pts[0])}&destination=${sgLL(pts[pts.length-1])}${pts.length>2?"&waypoints="+pts.slice(1,-1).slice(0,9).map(sgLL).join("%7C"):""}&travelmode=driving` : "";
+  return {km, h: km/(+settings.speed||65), maps};
+}
+function sgPlanHotel(st){
+  const last = addDays(st.from, st.nights-1);
+  return items.find(i=>i.type==="hotel" && i.date && i.date<=last && (i.endDate||addDays(i.date,1))>st.from);
+}
+function renderSuggestion(sg){
+  if (!sg || !Array.isArray(sg.stages) || !sg.stages.length)
+    return `<div class="empty"><h2>No suggestion yet</h2><p>Ask Claude for a suggested route, and it will appear here.</p></div>`;
+  let totKm=0, totH=0; const nights = sg.stages.reduce((n,s)=>n+s.nights,0);
+  const stagesHTML = sg.stages.map((st,si)=>{
+    const out = addDays(st.from, st.nights);
+    const planHotel = sgPlanHotel(st);
+    const daysHTML = st.days.map((d,di)=>{
+      const r = sgDayRoute(sg, si, di); totKm+=r.km; totH+=r.h;
+      const chips = (d.stops||[]).map(id=>{ const it=items.find(i=>i.id===id); if(!it) return "";
+        const sched = it.date ? (it.date===d.date ? "same day in your plan" : "in your plan: "+fmtShort(it.date)) : "idea";
+        return `<button class="sg-chip t-${it.type||"other"}" data-id="${esc(it.id)}" type="button">${esc(it.title||"Untitled")}<em>${esc(sched)}</em></button>`; }).join("");
+      return `<li class="sg-day"><div class="sg-date">${esc(fmtDay(d.date))}</div><div class="sg-daybody"><p>${esc(d.text)}</p>${chips?`<div class="sg-chips">${chips}</div>`:""}
+        ${r.km>2?`<div class="sg-drive">≈ ${Math.round(r.km)} km · ${sgFmtH(r.h)} driving${r.maps?` · <a href="${r.maps}" target="_blank" rel="noopener">Route in Google Maps ↗</a>`:""}</div>`:""}</div></li>`;
+    }).join("");
+    const hotels = `<div class="sg-hotels"><div class="sg-hotels-head"><b>Stay in ${esc(st.base)}</b><span>${esc(fmtShort(st.from))} → ${esc(fmtShort(out))} · ${st.nights} night${st.nights>1?"s":""} · 2 adults</span></div>
+      ${planHotel?`<div class="sg-booked">In your plan: <b>${esc(planHotel.title)}</b></div>`:""}
+      <div class="sg-cats">${SG_CATS.map(c=>`<a class="sg-cat" href="${sgBooking(st,c)}" target="_blank" rel="noopener"><b>${c.label}</b><span>${c.hint}</span></a>`).join("")}</div></div>`;
+    return `<article class="sg-stage"><header class="sg-head"><span class="sg-no">${si+1}</span><div><h3>${esc(st.title)}</h3><div class="sg-meta">${esc(fmtShort(st.from))} – ${esc(fmtShort(out))} · base ${esc(st.base)}</div></div></header>
+      <ol class="sg-days">${daysHTML}</ol>${hotels}</article>`;
+  }).join("");
+  const notes = (sg.notes||[]).map(n=>`<li class="sg-note ${n.kind==="conflict"?"warn":""}"><b>${n.kind==="conflict"?"Clash":"Good to know"}</b> ${esc(n.text)}</li>`).join("");
+  return `<section class="sg">
+    <div class="sg-intro"><h2>${esc(sg.title||"Suggested route")}</h2><p>${esc(sg.intro||"")}</p>
+      <div class="sg-sum"><span><b>${sg.stages.length}</b> bases</span><span><b>${nights}</b> nights</span><span>≈ <b>${Math.round(totKm).toLocaleString("en-GB")}</b> km · <b>${Math.round(totH)}</b> h driving</span></div>
+      <p class="sg-basis">${esc(sg.basis||"")}${sg.createdAt?` Suggested ${esc(fmtShort(sg.createdAt))}.`:""} Hotel buttons open Booking.com searches for those dates; prices and availability are live there.</p></div>
+    ${notes?`<ul class="sg-notes">${notes}</ul>`:""}
+    ${stagesHTML}
+  </section>`;
 }
 
 // ---------- data source (swap this for a database later to make the site editable) ----------
 async function loadTrip(){
   const r=await fetch("data/trip.json?v="+Date.now(),{cache:"no-store"});if(!r.ok)throw new Error(r.status);return r.json();
 }
-loadTrip().then(t=>{items=t.items||[];settings={...settings,...(t.settings||{})};syncedAt=t.syncedAt||"";render()})
+loadTrip().then(t=>{items=t.items||[];suggestion=t.suggestion||null;settings={...settings,...(t.settings||{})};syncedAt=t.syncedAt||"";render()})
   .catch(()=>{$("#tripMeta").textContent="Couldn't load the trip data. Reload to try again."});
 </script>
 </body>
