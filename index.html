@@ -152,6 +152,7 @@ main{padding-block:20px 60px}
 .sgdot{stroke:var(--surface);stroke-width:2;fill-opacity:1}
 .sgdot.t-event{fill:var(--copper)} .sgdot.t-poi{fill:var(--poi)} .sgdot.t-other{fill:var(--other)} .sgdot.t-hotel{fill:var(--hotel)}
 .route.sgr{stroke-width:3.5;stroke-dasharray:none;stroke-opacity:.85}
+.route.sgr.sgest{stroke-dasharray:3 8;stroke-width:3;stroke-opacity:.7}
 /* Suggested route */
 .sg{display:flex;flex-direction:column;gap:18px}
 .sg-intro h2{font-family:var(--f-display);font-size:1.5rem;margin:0 0 6px}
@@ -461,6 +462,20 @@ function render(){
 let suggestion=null;
 function sgBaseLayer(map){L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map)}
 function sgOpenEntry(id){openDetail(id)}
+// Road routes for the suggestion, calculated in the visitor's browser (OSRM) and cached.
+const sgLive=new Map();let sgQueue=Promise.resolve();const sgPending=new Set();
+try{const c=JSON.parse(localStorage.getItem("cts_sgroutes")||"{}");for(const k in c)sgLive.set(k,c[k])}catch(e){}
+function sgLiveSave(){try{const o={};[...sgLive].slice(-80).forEach(([k,v])=>{if(!v.failed)o[k]=v});localStorage.setItem("cts_sgroutes",JSON.stringify(o))}catch(e){}}
+function sgLiveRoute(key,pts){
+  if(sgLive.has(key)){const v=sgLive.get(key);return v.failed?null:v}
+  if(sgPending.has(key))return null;sgPending.add(key);
+  const coords=pts.map(p=>`${(+p.lng).toFixed(5)},${(+p.lat).toFixed(5)}`).join(";");
+  sgQueue=sgQueue.then(()=>fetch(`${OSRM}${coords}?overview=simplified&geometries=geojson&steps=false`).then(r=>r.ok?r.json():Promise.reject(r.status))
+    .then(j=>{if(j.code!=="Ok")throw j.code;const r=j.routes[0];sgLive.set(key,{km:r.distance/1000,h:r.duration/3600,geom:r.geometry.coordinates.map(([a,b])=>[+b.toFixed(5),+a.toFixed(5)])});sgLiveSave();if(view==="sug")scheduleRender()})
+    .catch(()=>{sgLive.set(key,{failed:true})})
+    .then(()=>new Promise(r=>setTimeout(r,350))));
+  return null;
+}
 
 // ---------- Links to learn more about a place ----------
 function infoQuery(it){
@@ -497,6 +512,13 @@ function sgBooking(st, cat){
 function sgKm(a,b){ const R=6371,r=x=>x*Math.PI/180,dLat=r(b.lat-a.lat),dLng=r(b.lng-a.lng);const h=Math.sin(dLat/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dLng/2)**2; return 2*R*Math.asin(Math.sqrt(h))*(+settings.factor||1.35); }
 const sgLL = p => `${(+p.lat).toFixed(5)},${(+p.lng).toFixed(5)}`;
 function sgFmtH(h){ const m=Math.round(h*60/5)*5; if(m<60) return m+" min"; const hh=Math.floor(m/60),mm=m%60; return hh+" h"+(mm?" "+String(mm).padStart(2,"0"):""); }
+let sgRoutes = null;   // stored road routes: {days:{date:{key,km,h,geom:[[lat,lng],...]}}}
+const sgRouteKey = pts => pts.map(p=>(+p.lat).toFixed(5)+","+(+p.lng).toFixed(5)).join(";");
+function sgRoadRoute(date, key, pts){
+  const s = sgRoutes && sgRoutes.days && sgRoutes.days[date];
+  if (s && s.key === key) return s;
+  return typeof sgLiveRoute === "function" ? sgLiveRoute(key, pts) : null;
+}
 function sgDayRoute(sg, si, di){
   const st = sg.stages[si], day = st.days[di];
   let start = null;
@@ -509,8 +531,13 @@ function sgDayRoute(sg, si, di){
   if (!day.noReturn){ const es = day.endStage ? sg.stages.find(s=>s.id===day.endStage) : st; end = {lat:es.lat,lng:es.lng,title:es.base}; }
   const pts = [start, ...stops, end].filter(Boolean).filter((p,k,a)=>k===0 || sgKm(a[k-1],p)>1);
   let km=0; for (let k=1;k<pts.length;k++) km += sgKm(pts[k-1], pts[k]);
+  let h = km/(+settings.speed||65), geom = null, real = false;
+  if (pts.length>1){
+    const key = sgRouteKey(pts), rr = sgRoadRoute(day.date, key, pts);
+    if (rr && Number.isFinite(+rr.km)){ km = +rr.km; h = +rr.h; geom = rr.geom || null; real = true; }
+  }
   const maps = pts.length>1 ? `https://www.google.com/maps/dir/?api=1&origin=${sgLL(pts[0])}&destination=${sgLL(pts[pts.length-1])}${pts.length>2?"&waypoints="+pts.slice(1,-1).slice(0,9).map(sgLL).join("%7C"):""}&travelmode=driving` : "";
-  return {km, h: km/(+settings.speed||65), maps, pts};
+  return {km, h, maps, pts, geom, real};
 }
 function sgPlanHotel(st){
   const last = addDays(st.from, st.nights-1);
@@ -528,15 +555,15 @@ function sgMissingHTML(sg){
 // ---------- Map of the suggested route ----------
 let sgMap = null, sgMapView = null;
 function sgMapPoints(sg){
-  // Per stage: ordered points of all its days (start → stops → base), plus the stops shown as dots.
+  // Per stage: one line per day (road geometry when known, else a straight line), plus the stops shown as dots.
   return sg.stages.map((st,si)=>{
-    const pts = []; const stops = [];
+    const lines = []; const stops = [];
     st.days.forEach((d,di)=>{
       const r = sgDayRoute(sg, si, di);
-      r.pts.forEach(p=>{ if (!pts.length || sgKm(pts[pts.length-1], p) > 1) pts.push(p); });
+      if (r.pts.length>1) lines.push(r.real && r.geom && r.geom.length>1 ? {latlngs:r.geom, real:true} : {latlngs:r.pts.map(p=>[+p.lat,+p.lng]), real:false});
       (d.stops||[]).forEach(id=>{ const it=items.find(i=>i.id===id); if (it && hasLoc(it)) stops.push({it, date:d.date}); });
     });
-    return {st, si, pts, stops};
+    return {st, si, lines, stops};
   });
 }
 function sgMountMap(sg){
@@ -546,9 +573,9 @@ function sgMountMap(sg){
   sgMap = L.map(el, {zoomSnap:.5, scrollWheelZoom:false});
   sgBaseLayer(sgMap);
   const bounds = [];
-  sgMapPoints(sg).forEach(({st, si, pts, stops})=>{
-    const cls = "route solid sgr d" + ((si % 6) + 1);
-    if (pts.length > 1) L.polyline(pts.map(p=>[+p.lat, +p.lng]), {className: cls, interactive:false}).addTo(sgMap);
+  let straight = 0;
+  sgMapPoints(sg).forEach(({st, si, lines, stops})=>{
+    lines.forEach(l=>{ if (!l.real) straight++; L.polyline(l.latlngs, {className: "route sgr d" + ((si % 6) + 1) + (l.real ? "" : " sgest"), interactive:false}).addTo(sgMap); });
     stops.forEach(({it, date})=>{
       L.circleMarker([+it.lat, +it.lng], {radius:6, className:"sgdot t-" + (it.type||"other")})
         .bindPopup(`<b>${esc(it.title||"")}</b>${esc(fmtDay(date))} · stage ${si+1}<br><button class="btn" data-sgid="${esc(it.id)}" type="button">Open</button>`).addTo(sgMap);
@@ -559,6 +586,8 @@ function sgMountMap(sg){
       .bindPopup(`<b>${si+1}. ${esc(st.title)}</b>${esc(st.base)}<br>${esc(fmtShort(st.from))} → ${esc(fmtShort(out))} · ${st.nights} night${st.nights>1?"s":""}`).addTo(sgMap);
     bounds.push([+st.lat, +st.lng]);
   });
+  const note = document.getElementById("sgRouteNote");
+  if (note) note.textContent = straight ? `${straight} day${straight>1?"s":""} still shown as straight dashed lines: ${typeof sgLiveRoute==="function" ? "calculating road routes…" : "road routes are calculated at the next website sync."}` : "All drives follow the actual roads (OpenStreetMap routing).";
   sgMap.on("popupopen", e=>{ const b = e.popup.getElement()?.querySelector("[data-sgid]"); if (b) b.onclick = ()=>{ sgMap.closePopup(); sgOpenEntry(b.dataset.sgid); }; });
   const key = sg.createdAt + "|" + sg.stages.length;
   if (sgMapView && sgMapView.key === key) sgMap.setView(sgMapView.center, sgMapView.zoom);
@@ -578,7 +607,7 @@ function renderSuggestion(sg){
         return `<button class="sg-chip t-${it.type||"other"}" data-id="${esc(it.id)}" type="button">${esc(it.title||"Untitled")}<em>${esc(sched)}</em></button>`; }).join("");
       const more = (d.stops||[]).map(id=>items.find(i=>i.id===id)).filter(Boolean).map(it=>`<li><b>${esc(it.title||"")}</b><span class="info-links">${infoLinks(it)}</span></li>`).join("");
       return `<li class="sg-day"><div class="sg-date">${esc(fmtDay(d.date))}</div><div class="sg-daybody"><p>${esc(d.text)}</p>${chips?`<div class="sg-chips">${chips}</div>`:""}${more?`<details class="sg-more"><summary>Learn more about these places</summary><ul>${more}</ul></details>`:""}
-        ${r.km>2?`<div class="sg-drive">≈ ${Math.round(r.km)} km · ${sgFmtH(r.h)} driving${r.maps?` · <a href="${r.maps}" target="_blank" rel="noopener">Route in Google Maps ↗</a>`:""}</div>`:""}</div></li>`;
+        ${r.km>2?`<div class="sg-drive">${r.real?"":"≈ "}${Math.round(r.km)} km · ${sgFmtH(r.h)} driving${r.real?"":" (estimate)"}${r.maps?` · <a href="${r.maps}" target="_blank" rel="noopener">Route in Google Maps ↗</a>`:""}</div>`:""}</div></li>`;
     }).join("");
     const hotels = `<div class="sg-hotels"><div class="sg-hotels-head"><b>Stay in ${esc(st.base)}</b><span>${esc(fmtShort(st.from))} → ${esc(fmtShort(out))} · ${st.nights} night${st.nights>1?"s":""} · 2 adults</span></div>
       ${planHotel?`<div class="sg-booked">In your plan: <b>${esc(planHotel.title)}</b></div>`:""}
@@ -592,7 +621,7 @@ function renderSuggestion(sg){
       <div class="sg-sum"><span><b>${sg.stages.length}</b> bases</span><span><b>${nights}</b> nights</span><span>≈ <b>${Math.round(totKm).toLocaleString("en-GB")}</b> km · <b>${Math.round(totH)}</b> h driving</span></div>
       <p class="sg-basis">${esc(sg.basis||"")}${sg.createdAt?` Suggested ${esc(fmtShort(sg.createdAt))}.`:""} Hotel buttons open Booking.com searches for those dates; prices and availability are live there.</p></div>
     <div class="sg-mapwrap"><div id="sgMap" role="region" aria-label="Map of the suggested route"></div>
-      <div class="sg-maplegend"><span>Numbered pins: where you sleep, in order</span><span class="t-event"><i></i>Event</span><span class="t-poi"><i></i>Place</span><span class="t-other"><i></i>Other</span><span>Lines: each stage's drives, as straight lines between stops</span></div></div>
+      <div class="sg-maplegend"><span>Numbered pins: where you sleep, in order</span><span class="t-event"><i></i>Event</span><span class="t-poi"><i></i>Place</span><span class="t-other"><i></i>Other</span><span>Lines: each day's drive, coloured by stage</span><span id="sgRouteNote"></span></div></div>
     ${sgMissingHTML(sg)}
     ${notes?`<ul class="sg-notes">${notes}</ul>`:""}
     ${stagesHTML}
@@ -603,7 +632,7 @@ function renderSuggestion(sg){
 async function loadTrip(){
   const r=await fetch("data/trip.json?v="+Date.now(),{cache:"no-store"});if(!r.ok)throw new Error(r.status);return r.json();
 }
-loadTrip().then(t=>{items=t.items||[];suggestion=t.suggestion||null;settings={...settings,...(t.settings||{})};syncedAt=t.syncedAt||"";render()})
+loadTrip().then(t=>{items=t.items||[];suggestion=t.suggestion||null;sgRoutes=t.routes||null;settings={...settings,...(t.settings||{})};syncedAt=t.syncedAt||"";render()})
   .catch(()=>{$("#tripMeta").textContent="Couldn't load the trip data. Reload to try again."});
 </script>
 </body>
