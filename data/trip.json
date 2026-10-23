@@ -93,7 +93,7 @@
   },
   {
    "id": "90aebkbi56u1x2ukusmj",
-   "type": "poi",
+   "type": "event",
    "title": "Creamfields Chile 14. 15. NOV",
    "lat": -33.4576431,
    "lng": -70.6683282,
@@ -287,5 +287,5 @@
    "lng": -70.25
   }
  ],
- "syncedAt": "2026-10-23T17:52:28Z"
+ "syncedAt": "2026-10-23T17:53:38Z"
 }
