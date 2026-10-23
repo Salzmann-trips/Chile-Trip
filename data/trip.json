@@ -71,6 +71,14 @@
    "lng": -70.6506
   },
   {
+   "id": "54z6ahheoksz0jwlmssz",
+   "type": "poi",
+   "title": "La Boca",
+   "place": "la boca, chile",
+   "lat": 0,
+   "lng": 0
+  },
+  {
    "id": "8yba0mrp0vc83ifs8f5s",
    "type": "hotel",
    "title": "Villa El Ingenio",
@@ -121,6 +129,14 @@
    "place": "Papudo",
    "lat": -32.5081,
    "lng": -71.4457
+  },
+  {
+   "id": "fqdtnlo46ds5zxsnp185",
+   "type": "poi",
+   "title": "Navidad",
+   "place": "Navidad",
+   "lat": -34.1978,
+   "lng": -71.8428
   },
   {
    "id": "gr6d04ojmn1dnc9rwkzx",
@@ -264,5 +280,5 @@
    "lng": -70.25
   }
  ],
- "syncedAt": "2026-10-23T17:19:19Z"
+ "syncedAt": "2026-10-23T17:36:03Z"
 }
