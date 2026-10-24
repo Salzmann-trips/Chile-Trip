@@ -98,8 +98,7 @@
    "type": "event",
    "title": "Creamfields Chile 14. 15. NOV",
    "lat": -33.4576431,
-   "lng": -70.6683282,
-   "url": "https://www.stubhub.com/cl/creamfields-festival-tickets/grouping/712740?=&PCID=PSCLADWHOME7678619148C8F0&MetroRegionID=&psc=&ps=cc-CL&ps_p=0&ps_c=23949796776&ps_ag=200863205907&ps_tg=kwd-319180361181&ps_ad=813980415732&ps_adp=&ps_fi=&ps_li=&ps_lp=1003299&ps_n=g&ps_d=c&ps_ex=&pscpag=&gcid=C12289X486&utm_source=google&utm_medium=paid-search&utm_sub_medium=prospecting&utm_term=nb&utm_campaign=23949796776:default&utm_content=default&keyword=200863205907_kwd-319180361181_c&creative=813980415732&utm_kxconfid=s2rshsbmv&kwt=nb&mt=e&kw=creamfield%20en%20chile&gad_source=1&gad_campaignid=23949796776&gbraid=0AAAAAD3ylY3wI-UT4Ox32Q7C9XmA1HhQ0&gclid=CjwKCAjwi-zWBhAdEiwAqlRf-PFzjf4WeDZYFR5SlpM6qWKbidjvSVMd6n7WfuzIBQ9zEEciiUp6DRoClq4QAvD_BwE"
+   "lng": -70.6683282
   },
   {
    "id": "99mu3to4xhgav34o0s6m",
@@ -601,5 +600,5 @@
   ]
  },
  "routes": null,
- "syncedAt": "2026-10-23T19:47:18Z"
+ "syncedAt": "2026-10-24T11:25:53Z"
 }
