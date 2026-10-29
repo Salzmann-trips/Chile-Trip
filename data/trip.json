@@ -242,6 +242,22 @@
    "lng": -70.3833
   },
   {
+   "id": "vps4hy9lrujbdl5n1l0y",
+   "type": "poi",
+   "title": "plaines del torres",
+   "place": "Torres del Paine (Laguna Amarga)",
+   "lat": -50.975,
+   "lng": -72.815
+  },
+  {
+   "id": "w0cey36kthykf6yzmimz",
+   "type": "poi",
+   "title": "Guacamole at Lolita Jones Vitacura",
+   "place": "ave kennedy norte, Vitacura",
+   "lat": -33.393,
+   "lng": -70.576
+  },
+  {
    "id": "wls6170uttdkuhvkdcp6",
    "type": "poi",
    "title": "Papudo",
@@ -600,5 +616,5 @@
   ]
  },
  "routes": null,
- "syncedAt": "2026-10-24T11:25:53Z"
+ "syncedAt": "2026-10-29T19:02:29Z"
 }
